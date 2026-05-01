@@ -50,10 +50,6 @@ body.page-glow::after {
 }
 
 .nav {
-  position: fixed;
-  bottom: 20px;
-  left: 20px;
-  width: calc(100vw - 40px);
   gap: 8px;
   padding: 3px;
   border: 1px solid var(--line);
