@@ -5,9 +5,12 @@ import secrets
 import json
 import os
 from datetime import datetime, timedelta
+from dotenv import load_dotenv
+
+load_dotenv()
 
 
-URL = 'https://buses.story-ml.ru/auth'
+URL = f'{os.getenv("BASE_URL")}/auth'
 HASH_FILE = 'magic_link.json'
 
 
