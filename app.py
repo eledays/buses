@@ -186,7 +186,7 @@ def create_app():
 
     @app.route('/manifest.json')
     def manifest():
-        return send_from_directory(os.path.join(app.root_path, 'static/icons'),
+        return send_from_directory(os.path.join(app.root_path, 'static'),
                                    'manifest.json', mimetype='application/json')
 
     return app
