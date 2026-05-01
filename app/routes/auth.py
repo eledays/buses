@@ -24,21 +24,31 @@ def auth():
 
     token_check_result = check_ml_token(Config.HASH_FILE, token)
     if not token_check_result:
-        return render_template('locked.html', message='Недействительный токен')
+        return redirect('/login')
 
     session['authorized'] = True
     session.permanent = True
     return redirect('/')
 
 
+@bp.route("/login", methods=["GET", "POST"])
+def login():
+    if request.method == "POST":
+        token = request.form.get("token")
+        if not token:
+            return render_template("login.html", error="Токен обязателен.")
+        elif not check_ml_token(Config.HASH_FILE, token):
+            return render_template("login.html", error="Неверный токен.")
+        session['authorized'] = True
+        session.permanent = True
+        return redirect("/")
+
+    return render_template("login.html")
+
+
 @bp.route("/logout")
 def logout():
     session.clear()
-    return redirect(url_for("auth.locked"))
-
-
-@bp.route("/locked")
-def locked():
-    return render_template("locked.html")
+    return redirect('/login')
 
 

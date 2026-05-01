@@ -1,0 +1,16 @@
+{% extends "base.html" %}
+{% block title %}Вход - Автобусы{% endblock %}
+
+{% block content %}
+<div class="login-container">
+    <h1>Вход</h1>
+    {% if error %}
+    <p class="error">{{ error }}</p>
+    {% endif %}
+    <form method="POST">
+        <label for="token">Токен:</label>
+        <input type="text" id="token" name="token" required>
+        <button type="submit" class="primary-button">Войти</button>
+    </form>
+</div>
+{% endblock %}

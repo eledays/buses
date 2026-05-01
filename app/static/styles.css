@@ -1048,3 +1048,26 @@ textarea[name="note"] {
   font-size: 1rem;
   font-weight: 400;
 }
+
+.login-container form {
+  display: block;
+}
+
+.login-container label {
+  display: block;
+  margin-bottom: 12px;
+}
+
+.login-container input {
+  font-size: 1rem;
+  font-weight: 400;
+  padding: 16px;
+  min-height: unset;
+}
+
+.login-container .primary-button {
+  width: 100%;
+  margin-top: 18px;
+  padding: 16px;
+  min-height: unset;
+}

@@ -109,12 +109,6 @@ if (rideForm && primaryButton) {
   });
 }
 
-document.querySelectorAll("input").forEach((input) => {
-  input.addEventListener("input", () => {
-    input.value = input.value.toUpperCase();
-  });
-});
-
 document.querySelectorAll("[data-collapse-target]").forEach((button) => {
   button.addEventListener("click", () => {
     const targetId = button.dataset.collapseTarget;

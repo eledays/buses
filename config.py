@@ -7,7 +7,7 @@ load_dotenv()
 
 
 class Config:
-    SECRET_KEY = os.getenv("FLASK_SECRET_KEY", secrets.token_hex(64))
+    SECRET_KEY = os.getenv("SECRET_KEY", secrets.token_hex(64))
     HASH_FILE = os.getenv('HASH_FILE', 'magic_link.json')
 
     SESSION_COOKIE_HTTPONLY = True

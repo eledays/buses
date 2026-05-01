@@ -5,7 +5,7 @@ import hashlib
 import json
 from traceback import print_exc
 
-from flask import render_template, session
+from flask import redirect, session
 
 
 
@@ -13,7 +13,7 @@ def require_auth(view):
     @wraps(view)
     def wrapped(*args, **kwargs):
         if not session.get("authorized"):
-            return render_template("locked.html")
+            return redirect('login')
         return view(*args, **kwargs)
 
     return wrapped

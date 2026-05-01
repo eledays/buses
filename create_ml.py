@@ -62,6 +62,8 @@ def main():
     print("=" * 60)
     print("Сгенерированная ссылка:")
     print(link)
+    print('Токен:')
+    print(token)
     print("=" * 60)
 
     save_hash(token)
