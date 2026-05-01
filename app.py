@@ -425,9 +425,6 @@ def check_ml_token(filename, token) -> bool:
         return False
 
 
-
-app = create_app()
-
-
 if __name__ == "__main__":
+    app = create_app()
     app.run()
