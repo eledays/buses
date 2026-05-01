@@ -6,24 +6,21 @@
   <div class="entry-panel">
 
     <form class="ride-form" method="post" autocomplete="off">
+      <div class="numbers-row">
+        <label>
+          <span>Маршрут</span>
+          <input name="route_number" inputmode="text" placeholder="M90" maxlength="16" required autofocus>
+        </label>
+        <label>
+          <span>Серийный номер</span>
+          <input name="bus_number" inputmode="text" placeholder="032145" maxlength="32" required>
+        </label>
+      </div>
       <label>
-        <span>Маршрут</span>
-        <input name="route_number" inputmode="text" placeholder="M90" maxlength="16" required autofocus>
-      </label>
-      <label>
-        <span>Серийный номер автобуса</span>
-        <input name="bus_number" inputmode="text" placeholder="032145" maxlength="32" required>
-      </label>
-      <label>
-        <span>Заметка</span>
-        <textarea name="note" placeholder="Что-то интересное?" maxlength="240"></textarea>
+        <textarea name="note" placeholder="Заметки" maxlength="240"></textarea>
       </label>
       <p class="form-error" data-form-error {% if not error %}hidden{% endif %}>{{ error or "" }}</p>
-      <button
-        class="primary-button"
-        type="submit"
-        data-record="{{ latest_record.id if latest_record else '' }}"
-      >
+      <button class="primary-button" type="submit" data-record="{{ latest_record.id if latest_record else '' }}">
         <span class="button-label">Записать</span>
         <span class="button-record" aria-hidden="true">#{{ latest_record.id if latest_record else '' }}</span>
       </button>

@@ -16,7 +16,8 @@ from flask import (
     request,
     session,
     url_for,
-    abort
+    abort,
+    send_from_directory
 )
 
 load_dotenv()
@@ -27,7 +28,8 @@ DATABASE = os.path.join(BASE_DIR, "buses.sqlite3")
 
 def create_app():
     app = Flask(__name__)
-    app.config["SECRET_KEY"] = os.getenv("FLASK_SECRET_KEY", "local-bus-collector-key")
+    app.config["SECRET_KEY"] = os.getenv(
+        "FLASK_SECRET_KEY", "local-bus-collector-key")
     app.config["BUS_GAME_SECRET"] = os.getenv("BUS_GAME_SECRET", "dev-secret")
     app.config["HASH_FILE"] = os.getenv('HASH_FILE', 'magic_link.json')
     app.config["SESSION_COOKIE_HTTPONLY"] = True
@@ -51,7 +53,7 @@ def create_app():
         db = g.pop("db", None)
         if db is not None:
             db.close()
-            
+
     @app.route('/auth')
     def auth():
         args = request.args
@@ -176,6 +178,11 @@ def create_app():
         )
         g.db.commit()
         return jsonify({"ok": True, "ride": serialize_ride(get_ride(ride_id))})
+
+    @app.route('/favicon.ico')
+    def favicon():
+        return send_from_directory(os.path.join(app.root_path, 'static'),
+                                   'favicon.ico', mimetype='image/vnd.microsoft.icon')
 
     return app
 
