@@ -238,7 +238,8 @@ label span {
   font-weight: 700;
 }
 
-input {
+input,
+textarea {
   width: 100%;
   min-height: 62px;
   border: 1px solid rgba(146, 165, 183, 0.24);
@@ -257,7 +258,15 @@ input {
     transform 160ms ease;
 }
 
-input:focus {
+textarea {
+  min-height: 92px;
+  resize: vertical;
+  line-height: 1.35;
+  padding: 16px 18px;
+}
+
+input:focus,
+textarea:focus {
   border-color: rgba(56, 215, 255, 0.74);
   box-shadow:
     0 0 0 4px rgba(56, 215, 255, 0.12),
@@ -569,6 +578,12 @@ input:focus {
 .ride-id {
   color: rgba(255, 255, 255, 0.35);
   font-weight: 800;
+}
+
+.ride-note {
+  margin: 6px 0 0;
+  color: rgba(238, 247, 255, 0.72);
+  font-size: 13px;
 }
 
 .leader-columns {
@@ -970,4 +985,9 @@ th {
   to {
     transform: rotate(360deg);
   }
+}
+
+textarea[name="note"] {
+  font-size: 1rem;
+  font-weight: 400;
 }

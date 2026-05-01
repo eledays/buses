@@ -64,6 +64,7 @@ def create_app():
         if request.method == "POST":
             route_number = normalize_field(request.form.get("route_number"))
             bus_number = normalize_field(request.form.get("bus_number"))
+            note = normalize_note(request.form.get("note"))
 
             if not route_number or not bus_number:
                 error = "Заполни маршрут и серийный номер автобуса."
@@ -73,10 +74,10 @@ def create_app():
                 now = datetime.now().replace(microsecond=0)
                 cursor = g.db.execute(
                     """
-                    INSERT INTO rides (route_number, bus_number, ridden_at)
-                    VALUES (?, ?, ?)
+                    INSERT INTO rides (route_number, bus_number, note, ridden_at)
+                    VALUES (?, ?, ?, ?)
                     """,
-                    (route_number, bus_number, now.isoformat()),
+                    (route_number, bus_number, note, now.isoformat()),
                 )
                 g.db.commit()
                 latest_record = get_ride(cursor.lastrowid)
@@ -85,7 +86,7 @@ def create_app():
 
         recent_rides = g.db.execute(
             """
-            SELECT id, route_number, bus_number, ridden_at
+            SELECT id, route_number, bus_number, note, ridden_at
             FROM rides
             ORDER BY ridden_at DESC, id DESC
             LIMIT 8
@@ -127,6 +128,7 @@ def init_db(db):
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             route_number TEXT NOT NULL,
             bus_number TEXT NOT NULL,
+            note TEXT,
             ridden_at TEXT NOT NULL
         )
         """
@@ -139,7 +141,24 @@ def init_db(db):
 def normalize_field(value):
     if value is None:
         return ""
-    return " ".join(value.strip().upper().split())
+    value = " ".join(value.strip().upper().split())
+    replaces = {
+        'm': 'м',
+        'e': 'е',
+        'sk': 'ск',
+        'c': 'с'
+    }
+    for k, v in replaces.items():
+        value = value.replace(k.upper(), v)
+    return value.upper()
+
+
+def normalize_note(value):
+    if value is None:
+        return None
+
+    note = " ".join(value.strip().split())
+    return note or None
 
 
 def wants_json_response():
@@ -154,6 +173,7 @@ def serialize_ride(ride):
         "id": ride["id"],
         "route_number": ride["route_number"],
         "bus_number": ride["bus_number"],
+        "note": ride["note"],
         "ridden_at": ride["ridden_at"],
     }
 
@@ -197,7 +217,7 @@ def plural_word(value, one, few, many):
 def get_ride(ride_id):
     return g.db.execute(
         """
-        SELECT id, route_number, bus_number, ridden_at
+        SELECT id, route_number, bus_number, note, ridden_at
         FROM rides
         WHERE id = ?
         """,
@@ -238,7 +258,7 @@ def collect_stats(detailed=False):
 
     last_ride = g.db.execute(
         """
-        SELECT id, route_number, bus_number, ridden_at
+        SELECT id, route_number, bus_number, note, ridden_at
         FROM rides
         ORDER BY ridden_at DESC, id DESC
         LIMIT 1
@@ -264,7 +284,7 @@ def collect_stats(detailed=False):
         ).fetchall()
         stats["recent"] = g.db.execute(
             """
-            SELECT id, route_number, bus_number, ridden_at
+            SELECT id, route_number, bus_number, note, ridden_at
             FROM rides
             ORDER BY ridden_at DESC, id DESC
             LIMIT 50

@@ -129,6 +129,9 @@
         <div>
           <strong>{{ ride.bus_number }}</strong>
           <p>{{ ride.ridden_at|replace("T", " ") }}</p>
+          {% if ride.note %}
+            <p class="ride-note">{{ ride.note }}</p>
+          {% endif %}
         </div>
         <span class="ride-id">#{{ ride.id }}</span>
       </article>
@@ -143,6 +146,9 @@
         <div>
           <strong>{{ ride.bus_number }}</strong>
           <p>{{ ride.ridden_at|replace("T", " ") }}</p>
+          {% if ride.note %}
+            <p class="ride-note">{{ ride.note }}</p>
+          {% endif %}
         </div>
         <span class="ride-id">#{{ ride.id }}</span>
       </article>

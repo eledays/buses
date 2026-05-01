@@ -8,11 +8,15 @@
     <form class="ride-form" method="post" autocomplete="off">
       <label>
         <span>Маршрут</span>
-        <input name="route_number" inputmode="text" placeholder="м90" maxlength="16" required autofocus>
+        <input name="route_number" inputmode="text" placeholder="M90" maxlength="16" required autofocus>
       </label>
       <label>
         <span>Серийный номер автобуса</span>
         <input name="bus_number" inputmode="text" placeholder="032145" maxlength="32" required>
+      </label>
+      <label>
+        <span>Заметка</span>
+        <textarea name="note" placeholder="Что-то интересное?" maxlength="240"></textarea>
       </label>
       <p class="form-error" data-form-error {% if not error %}hidden{% endif %}>{{ error or "" }}</p>
       <button
