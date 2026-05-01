@@ -1,0 +1,37 @@
+<!doctype html>
+<html lang="ru">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>{% block title %}Bus Collector{% endblock %}</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+  </head>
+  <body>
+    <div class="scene-glow scene-glow-left"></div>
+    <div class="scene-glow scene-glow-right"></div>
+    <div class="road-lines" aria-hidden="true"></div>
+
+    <header class="topbar">
+      <a class="brand" href="{{ url_for('index') if session.get('authorized') else url_for('locked') }}">
+        <span class="brand-mark"></span>
+        <span>Bus Collector</span>
+      </a>
+      {% if session.get("authorized") %}
+        <nav class="nav">
+          <a href="{{ url_for('index') }}">Запись</a>
+          <a href="{{ url_for('stats') }}">Статистика</a>
+          <a href="{{ url_for('logout') }}">Выход</a>
+        </nav>
+      {% endif %}
+    </header>
+
+    <main>
+      {% block content %}{% endblock %}
+    </main>
+
+    <script src="{{ url_for('static', filename='app.js') }}"></script>
+  </body>
+</html>

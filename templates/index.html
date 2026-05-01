@@ -1,0 +1,105 @@
+{% extends "base.html" %}
+{% block title %}Новая поездка - Bus Collector{% endblock %}
+
+{% block content %}
+<section class="hero-grid">
+  <div class="entry-panel">
+    <p class="eyebrow">Московский автобусный журнал</p>
+    <h1>Добавить поездку</h1>
+
+    <form class="ride-form" method="post" autocomplete="off">
+      <label>
+        <span>Маршрут</span>
+        <input name="route_number" inputmode="text" placeholder="м90" maxlength="16" required autofocus>
+      </label>
+      <label>
+        <span>Серийный номер автобуса</span>
+        <input name="bus_number" inputmode="text" placeholder="032145" maxlength="32" required>
+      </label>
+      {% if error %}
+        <p class="form-error">{{ error }}</p>
+      {% endif %}
+      <button class="primary-button" type="submit">
+        <span>Зафиксировать поездку</span>
+      </button>
+    </form>
+  </div>
+
+  <aside class="dashboard-panel">
+    <div class="bus-silhouette" aria-hidden="true">
+      <div class="window-strip"></div>
+      <div class="headlight headlight-left"></div>
+      <div class="headlight headlight-right"></div>
+    </div>
+    <div class="stat-row">
+      <span>Поездок</span>
+      <strong>{{ stats.totals.rides or 0 }}</strong>
+    </div>
+    <div class="stat-row">
+      <span>Маршрутов</span>
+      <strong>{{ stats.totals.routes or 0 }}</strong>
+    </div>
+    <div class="stat-row">
+      <span>Автобусов</span>
+      <strong>{{ stats.totals.buses or 0 }}</strong>
+    </div>
+  </aside>
+</section>
+
+{% if latest_record %}
+  {% set record_number = latest_record.id %}
+  <section class="reward {{ 'reward-milestone' if record_number % 100 == 0 else 'reward-round' if record_number % 10 == 0 else '' }}" data-record="{{ record_number }}">
+    <span class="scanline"></span>
+    <p>Запись принята</p>
+    <strong>#{{ record_number }}</strong>
+    <span>Маршрут {{ latest_record.route_number }} · автобус {{ latest_record.bus_number }}</span>
+  </section>
+{% endif %}
+
+<section class="content-grid">
+  <div class="section-block">
+    <div class="section-head">
+      <h2>Последние поездки</h2>
+      <a href="{{ url_for('stats') }}">Все данные</a>
+    </div>
+    <div class="ride-list">
+      {% for ride in recent_rides %}
+        <article class="ride-item">
+          <span class="route-chip">{{ ride.route_number }}</span>
+          <div>
+            <strong>{{ ride.bus_number }}</strong>
+            <p>{{ ride.ridden_at|replace("T", " ") }}</p>
+          </div>
+          <span class="ride-id">#{{ ride.id }}</span>
+        </article>
+      {% else %}
+        <p class="empty-state">Первый автобус еще ждет на остановке.</p>
+      {% endfor %}
+    </div>
+  </div>
+
+  <div class="section-block">
+    <div class="section-head">
+      <h2>Лидеры</h2>
+    </div>
+    <div class="leader-columns">
+      <div>
+        <h3>Маршруты</h3>
+        {% for route in stats.top_routes %}
+          <div class="leader-line"><span>{{ route.route_number }}</span><strong>{{ route.total }}</strong></div>
+        {% else %}
+          <p class="empty-state">Пока пусто.</p>
+        {% endfor %}
+      </div>
+      <div>
+        <h3>Автобусы</h3>
+        {% for bus in stats.top_buses %}
+          <div class="leader-line"><span>{{ bus.bus_number }}</span><strong>{{ bus.total }}</strong></div>
+        {% else %}
+          <p class="empty-state">Пока пусто.</p>
+        {% endfor %}
+      </div>
+    </div>
+  </div>
+</section>
+{% endblock %}
