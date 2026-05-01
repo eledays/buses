@@ -3,6 +3,9 @@ import sqlite3
 from datetime import datetime
 from functools import wraps
 from dotenv import load_dotenv
+import hashlib
+import json
+from traceback import print_exc
 
 from flask import (
     Flask,
@@ -13,6 +16,7 @@ from flask import (
     request,
     session,
     url_for,
+    abort
 )
 
 load_dotenv()
@@ -25,6 +29,7 @@ def create_app():
     app = Flask(__name__)
     app.config["SECRET_KEY"] = os.getenv("FLASK_SECRET_KEY", "local-bus-collector-key")
     app.config["BUS_GAME_SECRET"] = os.getenv("BUS_GAME_SECRET", "dev-secret")
+    app.config["HASH_FILE"] = os.getenv('HASH_FILE', 'magic_link.json')
     app.jinja_env.filters["profile_day"] = format_profile_day
     app.jinja_env.filters["datetime_local"] = format_datetime_local
     app.jinja_env.filters["plural"] = pluralize
@@ -41,13 +46,21 @@ def create_app():
         db = g.pop("db", None)
         if db is not None:
             db.close()
+            
+    @app.route('/auth')
+    def auth():
+        args = request.args
+        token = args.get('token')
 
-    @app.route("/login/<secret>")
-    def login(secret):
-        if secret != app.config["BUS_GAME_SECRET"]:
-            return render_template("locked.html"), 403
-        session["authorized"] = True
-        return redirect(url_for("index"))
+        if not token:
+            return abort(404)
+
+        token_check_result = check_ml_token(app.config.get('HASH_FILE'), token)
+        if not token_check_result:
+            return render_template('locked.html', message='Недействительный токен')
+
+        session['authorized'] = True
+        return redirect('/')
 
     @app.route("/logout")
     def logout():
@@ -359,6 +372,55 @@ def collect_stats(detailed=False):
         ).fetchall()
 
     return stats
+
+
+def check_ml_token(filename, token) -> bool:
+    if not os.path.exists(filename):
+        return False
+
+    now = datetime.now()
+    token_hash_original = hashlib.sha256(token.encode()).hexdigest()
+    found = False
+
+    try:
+        with open(filename, 'r') as file:
+            lines = json.load(file)
+
+        for line in lines:
+            expires_at = line.get('expires_at')
+            is_used = line.get('is_used', True)
+            token_hash = line.get('hash')
+
+            if not expires_at or not token_hash or is_used:
+                if token_hash == token_hash_original:
+                    break
+                else:
+                    continue
+
+            expires_at = datetime.strptime(
+                expires_at, '%d.%m.%Y %H:%M:%S')
+
+            if expires_at < now:
+                if token_hash == token_hash_original:
+                    break
+                else:
+                    continue
+
+            if token_hash_original == token_hash:
+                line['is_used'] = True
+                found = True
+                break
+
+        if found:
+            with open(filename, 'w') as file:
+                json.dump(lines, file)
+
+        return found
+
+    except:
+        print_exc()
+        return False
+
 
 
 app = create_app()

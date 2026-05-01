@@ -6,3 +6,4 @@ instance/
 .codex
 *.csv
 .env
+magic_link.json
