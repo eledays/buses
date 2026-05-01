@@ -101,7 +101,6 @@ if (rideForm && primaryButton) {
 
       animateRecordButton(result.ride.id);
       rideForm.reset();
-      rideForm.querySelector("input")?.focus();
     } catch (_error) {
       setFormError("Связь с сервером пропала. Попробуй еще раз.");
     } finally {
