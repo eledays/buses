@@ -6,6 +6,18 @@ main {
   padding: 10px 0;
 }
 
+body.page-glow::after {
+  position: fixed;
+  inset: 0;
+  z-index: 20;
+  pointer-events: none;
+  content: "";
+  background:
+    radial-gradient(circle at 50% 20%, rgba(56, 215, 255, 0.16), transparent 34rem),
+    radial-gradient(circle at 50% 78%, rgba(56, 215, 255, 0.12), transparent 28rem);
+  animation: pageGlow 650ms ease-out both;
+}
+
 .topbar {
   align-items: center;
   justify-content: space-between;
