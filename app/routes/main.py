@@ -1,26 +1,22 @@
-from app.utils.auth import require_auth, check_ml_token
-from app.utils.db import init_db, get_ride, collect_stats
+from app.utils.auth import require_auth
+from app.utils.db import (
+    init_db, get_ride, collect_stats, add_ride, get_all_rides,
+    get_recent_rides, delete_ride, update_ride
+)
 from app.utils.formats import (
     normalize_field, normalize_note, parse_ride_datetime, 
     serialize_ride, wants_json_response
 )
 from config import Config
 
-import os
 import sqlite3
-from datetime import datetime, timedelta
 
 from flask import (
     Blueprint,
     g,
     jsonify,
-    redirect,
     render_template,
     request,
-    session,
-    url_for,
-    abort,
-    send_from_directory
 )
 
 bp = Blueprint('main', __name__)
@@ -40,34 +36,6 @@ def close_database(_error=None):
         db.close()
 
 
-@bp.route('/auth')
-def auth():
-    args = request.args
-    token = args.get('token')
-
-    if not token:
-        return abort(404)
-
-    token_check_result = check_ml_token(Config.HASH_FILE, token)
-    if not token_check_result:
-        return render_template('locked.html', message='Недействительный токен')
-
-    session['authorized'] = True
-    session.permanent = True
-    return redirect('/')
-
-
-@bp.route("/logout")
-def logout():
-    session.clear()
-    return redirect(url_for("auth.locked"))
-
-
-@bp.route("/locked")
-def locked():
-    return render_template("locked.html")
-
-
 @bp.route("/", methods=["GET", "POST"])
 @require_auth
 def index():
@@ -84,28 +52,13 @@ def index():
             if wants_json_response():
                 return jsonify({"ok": False, "error": error}), 400
         else:
-            now = datetime.now().replace(microsecond=0)
-            cursor = g.db.execute(
-                """
-                INSERT INTO rides (route_number, bus_number, note, ridden_at)
-                VALUES (?, ?, ?, ?)
-                """,
-                (route_number, bus_number, note, now.isoformat()),
-            )
-            g.db.commit()
-            latest_record = get_ride(cursor.lastrowid)
+            ride_id = add_ride(g.db, route_number, bus_number, note)
+            latest_record = get_ride(g.db, ride_id)
             if wants_json_response():
                 return jsonify({"ok": True, "ride": serialize_ride(latest_record)})
 
-    recent_rides = g.db.execute(
-        """
-        SELECT id, route_number, bus_number, note, ridden_at
-        FROM rides
-        ORDER BY ridden_at DESC, id DESC
-        LIMIT 8
-        """
-    ).fetchall()
-    stats = collect_stats()
+    recent_rides = get_recent_rides(g.db)
+    stats = collect_stats(g.db)
 
     return render_template(
         "index.html",
@@ -120,32 +73,26 @@ def index():
 @bp.route("/stats")
 @require_auth
 def stats():
-    return render_template("stats.html", active_page="profile", stats=collect_stats(detailed=True))
+    stats = collect_stats(g.db, detailed=True)
+    return render_template("stats.html", active_page="profile", stats=stats)
 
 
 @bp.route("/rides")
 @require_auth
 def rides():
-    all_rides = g.db.execute(
-        """
-        SELECT id, route_number, bus_number, note, ridden_at
-        FROM rides
-        ORDER BY ridden_at DESC, id DESC
-        """
-    ).fetchall()
+    all_rides = get_all_rides(g.db)
     return render_template("rides.html", active_page="rides", rides=all_rides)
 
 
 @bp.route("/rides/<int:ride_id>", methods=["PUT", "DELETE"])
 @require_auth
 def ride_detail(ride_id):
-    ride = get_ride(ride_id)
+    ride = get_ride(g.db, ride_id)
     if ride is None:
         return jsonify({"ok": False, "error": "Запись не найдена."}), 404
 
     if request.method == "DELETE":
-        g.db.execute("DELETE FROM rides WHERE id = ?", (ride_id,))
-        g.db.commit()
+        delete_ride(g.db, ride_id)
         return jsonify({"ok": True})
 
     route_number = normalize_field(request.form.get("route_number"))
@@ -160,13 +107,5 @@ def ride_detail(ride_id):
     if not route_number or not bus_number:
         return jsonify({"ok": False, "error": "Заполни маршрут и серийный номер автобуса."}), 400
 
-    g.db.execute(
-        """
-        UPDATE rides
-        SET route_number = ?, bus_number = ?, note = ?, ridden_at = ?
-        WHERE id = ?
-        """,
-        (route_number, bus_number, note, ridden_at, ride_id),
-    )
-    g.db.commit()
-    return jsonify({"ok": True, "ride": serialize_ride(get_ride(ride_id))})
+    update_ride(g.db, ride_id, route_number, bus_number, note, ridden_at)
+    return jsonify({"ok": True, "ride": serialize_ride(get_ride(g.db, ride_id))})

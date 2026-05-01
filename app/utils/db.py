@@ -1,4 +1,6 @@
 from flask import g
+from datetime import datetime
+from typing import Optional, List, Tuple
 
 
 def init_db(db):
@@ -18,8 +20,8 @@ def init_db(db):
     db.commit()
 
 
-def get_ride(ride_id):
-    return g.db.execute(
+def get_ride(db, ride_id):
+    return db.execute(
         """
         SELECT id, route_number, bus_number, note, ridden_at
         FROM rides
@@ -29,8 +31,8 @@ def get_ride(ride_id):
     ).fetchone()
 
 
-def collect_stats(detailed=False):
-    totals = g.db.execute(
+def collect_stats(db, detailed=False):
+    totals = db.execute(
         """
         SELECT
             COUNT(*) AS rides,
@@ -40,7 +42,7 @@ def collect_stats(detailed=False):
         """
     ).fetchone()
 
-    top_routes = g.db.execute(
+    top_routes = db.execute(
         """
         SELECT route_number, COUNT(*) AS total
         FROM rides
@@ -49,7 +51,7 @@ def collect_stats(detailed=False):
         """
     ).fetchall()
 
-    top_buses = g.db.execute(
+    top_buses = db.execute(
         """
         SELECT bus_number, COUNT(*) AS total
         FROM rides
@@ -58,7 +60,7 @@ def collect_stats(detailed=False):
         """
     ).fetchall()
 
-    last_ride = g.db.execute(
+    last_ride = db.execute(
         """
         SELECT id, route_number, bus_number, note, ridden_at
         FROM rides
@@ -75,7 +77,7 @@ def collect_stats(detailed=False):
     }
 
     if detailed:
-        stats["timeline"] = g.db.execute(
+        stats["timeline"] = db.execute(
             """
             SELECT DATE(ridden_at) AS day, COUNT(*) AS total
             FROM rides
@@ -83,7 +85,7 @@ def collect_stats(detailed=False):
             ORDER BY day DESC
             """
         ).fetchall()
-        stats["recent"] = g.db.execute(
+        stats["recent"] = db.execute(
             """
             SELECT id, route_number, bus_number, note, ridden_at
             FROM rides
@@ -93,3 +95,62 @@ def collect_stats(detailed=False):
         ).fetchall()
 
     return stats
+
+
+def add_ride(db, route_number, bus_number, note) -> int:
+    now = datetime.now().replace(microsecond=0)
+    cursor = db.execute(
+        """
+        INSERT INTO rides (route_number, bus_number, note, ridden_at)
+        VALUES (?, ?, ?, ?)
+        """,
+        (route_number, bus_number, note, now.isoformat()),
+    )
+    db.commit()
+    return cursor.lastrowid
+
+
+def get_all_rides(db) -> list:
+    cursor = db.execute(
+        """
+        SELECT id, route_number, bus_number, note, ridden_at
+        FROM rides
+        ORDER BY ridden_at DESC, id DESC
+        """
+    )
+    return cursor.fetchall()
+
+
+def get_recent_rides(db) -> list:
+    cursor = db.execute(
+        """
+        SELECT id, route_number, bus_number, note, ridden_at
+        FROM rides
+        ORDER BY ridden_at DESC, id DESC
+        LIMIT 10
+        """
+    )
+    return cursor.fetchall()
+
+
+def delete_ride(db, ride_id) -> None:
+    db.execute(
+        """
+        DELETE FROM rides
+        WHERE id = ?
+        """,
+        (ride_id,),
+    )
+    db.commit()
+
+
+def update_ride(db, ride_id, route_number, bus_number, note, ridden_at) -> None:
+    db.execute(
+        """
+        UPDATE rides
+        SET route_number = ?, bus_number = ?, note = ?, ridden_at = ?
+        WHERE id = ?
+        """,
+        (route_number, bus_number, note, ridden_at, ride_id),
+    )
+    db.commit()
