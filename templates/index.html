@@ -14,24 +14,17 @@
         <span>Серийный номер автобуса</span>
         <input name="bus_number" inputmode="text" placeholder="032145" maxlength="32" required>
       </label>
-      {% if error %}
-        <p class="form-error">{{ error }}</p>
-      {% endif %}
-      <button class="primary-button" type="submit">
-        <span>Записать</span>
+      <p class="form-error" data-form-error {% if not error %}hidden{% endif %}>{{ error or "" }}</p>
+      <button
+        class="primary-button"
+        type="submit"
+        data-record="{{ latest_record.id if latest_record else '' }}"
+      >
+        <span class="button-label">Записать</span>
+        <span class="button-record" aria-hidden="true">#{{ latest_record.id if latest_record else '' }}</span>
       </button>
     </form>
   </div>
 </section>
-
-{% if latest_record %}
-  {% set record_number = latest_record.id %}
-  <section class="reward {{ 'reward-milestone' if record_number % 100 == 0 else 'reward-round' if record_number % 10 == 0 else '' }}" data-record="{{ record_number }}">
-    <span class="scanline"></span>
-    <p>Запись принята</p>
-    <strong>#{{ record_number }}</strong>
-    <span>Маршрут {{ latest_record.route_number }} · автобус {{ latest_record.bus_number }}</span>
-  </section>
-{% endif %}
 
 {% endblock %}

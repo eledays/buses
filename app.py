@@ -6,6 +6,7 @@ from functools import wraps
 from flask import (
     Flask,
     g,
+    jsonify,
     redirect,
     render_template,
     request,
@@ -63,6 +64,8 @@ def create_app():
 
             if not route_number or not bus_number:
                 error = "Заполни маршрут и серийный номер автобуса."
+                if wants_json_response():
+                    return jsonify({"ok": False, "error": error}), 400
             else:
                 now = datetime.now().replace(microsecond=0)
                 cursor = g.db.execute(
@@ -74,6 +77,8 @@ def create_app():
                 )
                 g.db.commit()
                 latest_record = get_ride(cursor.lastrowid)
+                if wants_json_response():
+                    return jsonify({"ok": True, "ride": serialize_ride(latest_record)})
 
         recent_rides = g.db.execute(
             """
@@ -132,6 +137,22 @@ def normalize_field(value):
     if value is None:
         return ""
     return " ".join(value.strip().upper().split())
+
+
+def wants_json_response():
+    return (
+        request.headers.get("X-Requested-With") == "fetch"
+        or request.accept_mimetypes.best == "application/json"
+    )
+
+
+def serialize_ride(ride):
+    return {
+        "id": ride["id"],
+        "route_number": ride["route_number"],
+        "bus_number": ride["bus_number"],
+        "ridden_at": ride["ridden_at"],
+    }
 
 
 def get_ride(ride_id):
