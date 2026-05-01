@@ -1,6 +1,6 @@
 import os
 import sqlite3
-from datetime import datetime
+from datetime import datetime, timedelta
 from functools import wraps
 from dotenv import load_dotenv
 import hashlib
@@ -33,6 +33,8 @@ def create_app():
     app.config["SESSION_COOKIE_HTTPONLY"] = True
     app.config["SESSION_COOKIE_SECURE"] = True
     app.config["SESSION_COOKIE_SAMESITE"] = 'Lax'
+    app.config["PERMANENT_SESSION_LIFETIME"] = timedelta(days=30)
+    app.config["SESSION_PERMANENT"] = True
     app.jinja_env.filters["profile_day"] = format_profile_day
     app.jinja_env.filters["datetime_local"] = format_datetime_local
     app.jinja_env.filters["plural"] = pluralize
@@ -63,6 +65,7 @@ def create_app():
             return render_template('locked.html', message='Недействительный токен')
 
         session['authorized'] = True
+        session.permanent = True
         return redirect('/')
 
     @app.route("/logout")
