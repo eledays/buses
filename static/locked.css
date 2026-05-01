@@ -1,0 +1,24 @@
+@import url('root.css');
+
+.brand {
+  display: flex;
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  font-weight: 800;
+  font-size: 2rem;
+  letter-spacing: 0;
+}
+
+.brand-mark {
+  width: 120px;
+  height: 40px;
+  border: 2px solid var(--cyan);
+  border-radius: 5px;
+  box-shadow: 0 0 24px rgba(56, 215, 255, 0.6);
+  margin-right: 18px;
+}
