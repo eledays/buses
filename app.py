@@ -30,6 +30,9 @@ def create_app():
     app.config["SECRET_KEY"] = os.getenv("FLASK_SECRET_KEY", "local-bus-collector-key")
     app.config["BUS_GAME_SECRET"] = os.getenv("BUS_GAME_SECRET", "dev-secret")
     app.config["HASH_FILE"] = os.getenv('HASH_FILE', 'magic_link.json')
+    app.config["SESSION_COOKIE_HTTPONLY"] = True
+    app.config["SESSION_COOKIE_SECURE"] = True
+    app.config["SESSION_COOKIE_SAMESITE"] = 'Lax'
     app.jinja_env.filters["profile_day"] = format_profile_day
     app.jinja_env.filters["datetime_local"] = format_datetime_local
     app.jinja_env.filters["plural"] = pluralize
@@ -427,4 +430,4 @@ app = create_app()
 
 
 if __name__ == "__main__":
-    app.run(debug=True)
+    app.run()
