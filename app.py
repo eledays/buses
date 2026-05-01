@@ -87,6 +87,7 @@ def create_app():
 
         return render_template(
             "index.html",
+            active_page="entry",
             error=error,
             latest_record=latest_record,
             recent_rides=recent_rides,
@@ -96,7 +97,7 @@ def create_app():
     @app.route("/stats")
     @require_auth
     def stats():
-        return render_template("stats.html", stats=collect_stats(detailed=True))
+        return render_template("stats.html", active_page="profile", stats=collect_stats(detailed=True))
 
     return app
 

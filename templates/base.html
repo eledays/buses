@@ -10,20 +10,15 @@
     <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
   </head>
   <body>
-    <div class="scene-glow scene-glow-left"></div>
-    <div class="scene-glow scene-glow-right"></div>
-    <div class="road-lines" aria-hidden="true"></div>
-
     <header class="topbar">
       <a class="brand" href="{{ url_for('index') if session.get('authorized') else url_for('locked') }}">
         <span class="brand-mark"></span>
-        <span>Bus Collector</span>
+        <span>Автобусы</span>
       </a>
       {% if session.get("authorized") %}
         <nav class="nav">
-          <a href="{{ url_for('index') }}">Запись</a>
-          <a href="{{ url_for('stats') }}">Статистика</a>
-          <a href="{{ url_for('logout') }}">Выход</a>
+          <a class="{{ 'active' if active_page == 'entry' else '' }}" href="{{ url_for('index') }}">Запись</a>
+          <a class="{{ 'active' if active_page == 'profile' else '' }}" href="{{ url_for('stats') }}">Профиль</a>
         </nav>
       {% endif %}
     </header>
