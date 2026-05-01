@@ -170,18 +170,16 @@ main {
 
 .dashboard-panel,
 .section-block,
+.profile-hero,
 .locked-panel,
 .stats-hero,
 .reward {
   border: 1px solid var(--line);
   border-radius: 8px;
-  background: linear-gradient(
-    145deg,
-    rgba(14, 22, 34, 0.96),
-    rgba(7, 11, 18, 0.78)
-  );
+  background: rgba(255, 255, 255, 0.035);
   box-shadow: var(--shadow);
   backdrop-filter: blur(18px);
+  max-width: 100%;
 }
 
 .eyebrow {
@@ -432,8 +430,7 @@ input:focus {
 
 .stat-row,
 .leader-line,
-.ride-item,
-.bar-line {
+.ride-item {
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -524,6 +521,9 @@ input:focus {
 .section-block,
 .stats-hero,
 .locked-panel {
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
   padding: 24px;
 }
 
@@ -583,18 +583,75 @@ input:focus {
   color: var(--green);
 }
 
-.stats-hero {
+.stats-hero,
+.profile-hero {
   margin-bottom: 22px;
 }
 
-.stats-hero h1 {
+.stats-hero h1,
+.profile-hero h1 {
   margin-bottom: 24px;
+}
+
+.profile-hero {
+  position: relative;
+  display: flex;
+  align-items: end;
+  justify-content: space-between;
+  gap: 18px;
+  overflow: hidden;
+  padding: 24px;
+}
+
+.profile-hero::after {
+  position: absolute;
+  right: -5rem;
+  bottom: -8rem;
+  width: 20rem;
+  height: 16rem;
+  content: "";
+  background: radial-gradient(circle, rgba(56, 215, 255, 0.2), transparent 68%);
+}
+
+.profile-hero > * {
+  position: relative;
+  z-index: 1;
+}
+
+.profile-badge {
+  display: grid;
+  place-items: center;
+  min-width: 126px;
+  min-height: 96px;
+  border: 1px solid rgba(56, 215, 255, 0.36);
+  border-radius: 8px;
+  background: rgba(2, 5, 10, 0.58);
+  box-shadow:
+    inset 0 0 0 1px rgba(56, 215, 255, 0.12),
+    0 0 34px rgba(56, 215, 255, 0.14);
+}
+
+.profile-badge span {
+  color: var(--muted);
+  font-size: 13px;
+  font-weight: 800;
+}
+
+.profile-badge strong {
+  color: var(--cyan);
+  font-size: 42px;
+  line-height: 1;
+  text-shadow: 0 0 24px rgba(56, 215, 255, 0.46);
 }
 
 .metric-strip {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
   gap: 12px;
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
+  margin-bottom: 22px;
 }
 
 .metric-strip div {
@@ -602,6 +659,7 @@ input:focus {
   border: 1px solid var(--line);
   border-radius: 8px;
   background: rgba(255, 255, 255, 0.035);
+  text-align: center;
 }
 
 .metric-strip strong {
@@ -610,43 +668,172 @@ input:focus {
   font-size: 38px;
 }
 
-.stats-grid {
-  grid-template-columns: 1fr 1fr;
+.metric-strip span {
+  font-size: 12px;
 }
 
-.bar-line {
-  margin: 12px 0;
+.stats-grid,
+.profile-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 22px;
+  width: 100%;
+  min-width: 0;
 }
 
-.bar-line span {
-  width: 92px;
+.rating-list {
+  display: grid;
+  gap: 10px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.rating-item {
+  display: flex;
+  align-items: center;
+  min-width: 0;
+  padding: 6px 0;
+  color: var(--text);
   font-weight: 800;
 }
 
-.bar-line div {
-  flex: 1;
-  height: 10px;
-  overflow: hidden;
-  border-radius: 999px;
-  background: rgba(255, 255, 255, 0.08);
+.rating-place {
+  width: 30px;
+  flex: 0 0 auto;
+  color: var(--muted);
 }
 
-.bar-line i {
-  display: block;
-  max-width: 100%;
-  height: 100%;
-  border-radius: inherit;
-  background: linear-gradient(90deg, var(--cyan), var(--green), var(--amber));
+.rating-value {
+  min-width: 0;
+  padding: 4px 6px;
+  border: 1px solid rgba(56, 215, 255, 0.42);
+  border-radius: 8px;
+  background: var(--cyan);
+  color: #000;
+  text-shadow: 0 0 18px rgba(56, 215, 255, 0.22);
+}
+
+.rating-count {
+  min-width: 0;
+  margin-left: 8px;
+  color: var(--muted);
+}
+
+.bus-rating .rating-value {
+  border-color: rgba(190, 198, 204, 0.3);
+  background:
+    linear-gradient(135deg, rgba(255, 255, 255, 0.09), rgba(98, 108, 118, 0.06)),
+    rgba(255, 255, 255, 0.028);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.14),
+    inset 0 -1px 0 rgba(0, 0, 0, 0.28);
+}
+
+.bus-rating .rating-item.is-leader .rating-value {
+  border-color: rgba(235, 196, 94, 0.56);
+  background:
+    linear-gradient(135deg, rgba(255, 222, 128, 0.16), rgba(154, 128, 54, 0.08)),
+    rgba(255, 255, 255, 0.035);
+  color: #f3d26f;
+  box-shadow:
+    inset 0 1px 0 rgba(255, 244, 184, 0.24),
+    inset 0 -1px 0 rgba(0, 0, 0, 0.32),
+    0 0 28px rgba(235, 196, 94, 0.14);
+  text-shadow: 0 0 18px rgba(243, 210, 111, 0.34);
 }
 
 .wide-block {
+  width: 100%;
+  max-width: 100%;
   margin-top: 22px;
+}
+
+.collapse-toggle {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  border: 0;
+  background: transparent;
+  color: var(--text);
+  cursor: pointer;
+  font-size: 24px;
+  font-weight: 800;
+  font-family: inherit;
+  padding-right: 48px;
+}
+
+.collapse-toggle::after {
+  position: absolute;
+  top: 0;
+  right: 0;
+  display: grid;
+  place-items: center;
+  width: 34px;
+  height: 34px;
+  border: 1px solid rgba(56, 215, 255, 0.36);
+  border-radius: 8px;
+  content: "+";
+  color: var(--cyan);
+  font-size: 22px;
+  line-height: 1;
+  transition:
+    transform 180ms ease,
+    background-color 180ms ease;
+}
+
+.collapse-toggle[aria-expanded="true"]::after {
+  transform: rotate(45deg);
+  background: rgba(56, 215, 255, 0.1);
+}
+
+.collapse-toggle strong {
+  margin-left: auto;
+  color: var(--muted);
+  font-size: 15px;
+}
+
+.ride-log-list {
+  display: grid;
+  gap: 12px;
+  margin-top: 18px;
+}
+
+.preview-list[hidden],
+.full-list[hidden] {
+  display: none;
+}
+
+.logout-button {
+  display: grid;
+  place-items: center;
+  min-height: 54px;
+  margin-top: 22px;
+  border: 1px solid rgba(255, 85, 116, 0.34);
+  border-radius: 8px;
+  background: rgba(255, 85, 116, 0.08);
+  color: #ffd7df;
+  font-weight: 900;
+  box-shadow: 0 0 28px rgba(255, 85, 116, 0.08);
+  transition:
+    border-color 160ms ease,
+    background-color 160ms ease,
+    transform 160ms ease;
+}
+
+.logout-button:hover {
+  border-color: rgba(255, 85, 116, 0.58);
+  background: rgba(255, 85, 116, 0.14);
+  transform: translateY(-1px);
 }
 
 .timeline {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+  grid-template-columns: 1fr;
   gap: 10px;
+  margin-top: 18px;
 }
 
 .timeline-day {
@@ -656,6 +843,14 @@ input:focus {
   border: 1px solid var(--line);
   border-radius: 8px;
   background: rgba(255, 255, 255, 0.035);
+}
+
+.ride-date {
+  display: block;
+  margin-top: 4px;
+  color: var(--muted);
+  font-size: 13px;
+  font-weight: 500;
 }
 
 .table-wrap {

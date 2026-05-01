@@ -23,6 +23,7 @@ def create_app():
     app = Flask(__name__)
     app.config["SECRET_KEY"] = os.environ.get("FLASK_SECRET_KEY", "local-bus-collector-key")
     app.config["BUS_GAME_SECRET"] = os.environ.get("BUS_GAME_SECRET", "dev-secret")
+    app.jinja_env.filters["profile_day"] = format_profile_day
 
     @app.before_request
     def open_database():
@@ -153,6 +154,17 @@ def serialize_ride(ride):
         "bus_number": ride["bus_number"],
         "ridden_at": ride["ridden_at"],
     }
+
+
+def format_profile_day(value):
+    try:
+        day = datetime.fromisoformat(value)
+    except (TypeError, ValueError):
+        return value
+
+    if day.year == datetime.now().year:
+        return day.strftime("%d.%m")
+    return day.strftime("%d.%m.%Y")
 
 
 def get_ride(ride_id):

@@ -115,3 +115,23 @@ document.querySelectorAll("input").forEach((input) => {
     input.value = input.value.toUpperCase();
   });
 });
+
+document.querySelectorAll("[data-collapse-target]").forEach((button) => {
+  button.addEventListener("click", () => {
+    const targetId = button.dataset.collapseTarget;
+    const target = document.getElementById(targetId);
+    const preview = document.querySelector(`[data-collapse-preview="${targetId}"]`);
+
+    if (!target) {
+      return;
+    }
+
+    const isOpen = button.getAttribute("aria-expanded") === "true";
+    button.setAttribute("aria-expanded", String(!isOpen));
+    target.hidden = isOpen;
+
+    if (preview) {
+      preview.hidden = !isOpen;
+    }
+  });
+});

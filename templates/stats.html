@@ -1,51 +1,77 @@
 {% extends "base.html" %}
-{% block title %}Статистика - Bus Collector{% endblock %}
+{% block title %}Профиль - Bus Collector{% endblock %}
 
 {% block content %}
-<section class="stats-hero">
-  <p class="eyebrow">Коллекция растет</p>
-  <h1>Статистика поездок</h1>
-  <div class="metric-strip">
-    <div><span>Всего</span><strong>{{ stats.totals.rides or 0 }}</strong></div>
-    <div><span>Маршрутов</span><strong>{{ stats.totals.routes or 0 }}</strong></div>
-    <div><span>Автобусов</span><strong>{{ stats.totals.buses or 0 }}</strong></div>
+<section class="metric-strip">
+  <div>
+    <strong>{{ stats.totals.rides or 0 }}</strong>
+    <span>поездки</span>
+  </div>
+  <div>
+    <strong>{{ stats.totals.routes or 0 }}</strong>
+    <span>маршруты</span>
+  </div>
+  <div>
+    <strong>{{ stats.totals.buses or 0 }}</strong>
+    <span>автобусы</span>
   </div>
 </section>
 
-<section class="content-grid stats-grid">
+<section class="profile-grid">
   <div class="section-block">
     <div class="section-head"><h2>Топ маршрутов</h2></div>
-    {% for route in stats.top_routes %}
-      <div class="bar-line">
-        <span>{{ route.route_number }}</span>
-        <div><i style="width: {{ 10 + route.total * 14 }}px"></i></div>
-        <strong>{{ route.total }}</strong>
-      </div>
+    {% if stats.top_routes %}
+      <ol class="rating-list route-rating">
+      {% for route in stats.top_routes %}
+        <li class="rating-item {{ 'is-leader' if loop.first else '' }}">
+          <span class="rating-place">{{ loop.index }}.</span>
+          <span class="rating-value">{{ route.route_number }}</span>
+          <span class="rating-count">- {{ route.total }} поездок</span>
+        </li>
+      {% endfor %}
+      </ol>
     {% else %}
       <p class="empty-state">Нет данных для рейтинга.</p>
-    {% endfor %}
+    {% endif %}
   </div>
 
   <div class="section-block">
     <div class="section-head"><h2>Топ автобусов</h2></div>
-    {% for bus in stats.top_buses %}
-      <div class="bar-line">
-        <span>{{ bus.bus_number }}</span>
-        <div><i style="width: {{ 10 + bus.total * 14 }}px"></i></div>
-        <strong>{{ bus.total }}</strong>
-      </div>
+    {% if stats.top_buses %}
+      <ol class="rating-list bus-rating">
+      {% for bus in stats.top_buses %}
+        <li class="rating-item {{ 'is-leader' if loop.first else '' }}">
+          <span class="rating-place">{{ loop.index }}.</span>
+          <span class="rating-value">{{ bus.bus_number }}</span>
+          <span class="rating-count">- {{ bus.total }} поездок</span>
+        </li>
+      {% endfor %}
+      </ol>
     {% else %}
       <p class="empty-state">Нет данных для рейтинга.</p>
-    {% endfor %}
+    {% endif %}
   </div>
 </section>
 
-<section class="section-block wide-block">
-  <div class="section-head"><h2>Активность по дням</h2></div>
-  <div class="timeline">
+<section class="section-block wide-block collapsible-block activity-log">
+  <button class="collapse-toggle" type="button" data-collapse-target="activity-full" aria-expanded="false">
+    <span>Активность по дням</span>
+    <strong>{{ stats.timeline|length }}</strong>
+  </button>
+  <div class="timeline preview-list" data-collapse-preview="activity-full">
+    {% for day in stats.timeline[:3] %}
+      <div class="timeline-day">
+        <span>{{ day.day|profile_day }}</span>
+        <strong>{{ day.total }}</strong>
+      </div>
+    {% else %}
+      <p class="empty-state">Календарь оживет после первой поездки.</p>
+    {% endfor %}
+  </div>
+  <div class="timeline full-list" id="activity-full" hidden>
     {% for day in stats.timeline %}
       <div class="timeline-day">
-        <span>{{ day.day }}</span>
+        <span>{{ day.day|profile_day }}</span>
         <strong>{{ day.total }}</strong>
       </div>
     {% else %}
@@ -54,31 +80,40 @@
   </div>
 </section>
 
-<section class="section-block wide-block">
-  <div class="section-head"><h2>Журнал</h2></div>
-  <div class="table-wrap">
-    <table>
-      <thead>
-        <tr>
-          <th>#</th>
-          <th>Маршрут</th>
-          <th>Автобус</th>
-          <th>Дата и время</th>
-        </tr>
-      </thead>
-      <tbody>
-        {% for ride in stats.recent %}
-          <tr>
-            <td>{{ ride.id }}</td>
-            <td>{{ ride.route_number }}</td>
-            <td>{{ ride.bus_number }}</td>
-            <td>{{ ride.ridden_at|replace("T", " ") }}</td>
-          </tr>
-        {% else %}
-          <tr><td colspan="4">Записей пока нет.</td></tr>
-        {% endfor %}
-      </tbody>
-    </table>
+<section class="section-block wide-block collapsible-block ride-log">
+  <button class="collapse-toggle" type="button" data-collapse-target="rides-full" aria-expanded="false">
+    <span>Все поездки</span>
+    <strong>{{ stats.recent|length }}</strong>
+  </button>
+  <div class="ride-log-list preview-list" data-collapse-preview="rides-full">
+    {% for ride in stats.recent[:3] %}
+      <article class="ride-item">
+        <span class="route-chip">{{ ride.route_number }}</span>
+        <div>
+          <strong>{{ ride.bus_number }}</strong>
+          <p>{{ ride.ridden_at|replace("T", " ") }}</p>
+        </div>
+        <span class="ride-id">#{{ ride.id }}</span>
+      </article>
+    {% else %}
+      <p class="empty-state">Записей пока нет.</p>
+    {% endfor %}
+  </div>
+  <div class="ride-log-list full-list" id="rides-full" hidden>
+    {% for ride in stats.recent %}
+      <article class="ride-item">
+        <span class="route-chip">{{ ride.route_number }}</span>
+        <div>
+          <strong>{{ ride.bus_number }}</strong>
+          <p>{{ ride.ridden_at|replace("T", " ") }}</p>
+        </div>
+        <span class="ride-id">#{{ ride.id }}</span>
+      </article>
+    {% else %}
+      <p class="empty-state">Записей пока нет.</p>
+    {% endfor %}
   </div>
 </section>
+
+<a class="logout-button" href="{{ url_for('logout') }}">Выход</a>
 {% endblock %}
