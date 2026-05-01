@@ -1,5 +1,5 @@
 {% extends "base.html" %}
-{% block title %}Профиль - Bus Collector{% endblock %}
+{% block title %}Статистика - Автобусы{% endblock %}
 
 {% block content %}
 <section class="metric-strip">
@@ -85,80 +85,6 @@
       <p class="empty-state">Нет данных для рейтинга.</p>
     {% endif %}
   </section>
-</section>
-
-<section class="section-block wide-block collapsible-block activity-log">
-  <div class="collapse-head">
-    <span>Активность по дням</span>
-    <strong>{{ (stats.timeline|length)|plural("день", "дня", "дней") }}</strong>
-  </div>
-  <div class="timeline preview-list" data-collapse-preview="activity-full">
-    {% for day in stats.timeline[:3] %}
-      <div class="timeline-day">
-        <span>{{ day.day|profile_day }}</span>
-        <strong>{{ day.total }}</strong>
-      </div>
-    {% else %}
-      <p class="empty-state">Календарь оживет после первой поездки.</p>
-    {% endfor %}
-  </div>
-  <div class="timeline full-list" id="activity-full" hidden>
-    {% for day in stats.timeline[3:] %}
-      <div class="timeline-day">
-        <span>{{ day.day|profile_day }}</span>
-        <strong>{{ day.total }}</strong>
-      </div>
-    {% endfor %}
-  </div>
-  {% if stats.timeline|length > 3 %}
-    <button class="collapse-toggle" type="button" data-collapse-target="activity-full" aria-expanded="false">
-      <span data-more-text>Смотреть больше</span>
-    </button>
-  {% endif %}
-</section>
-
-<section class="section-block wide-block collapsible-block ride-log">
-  <div class="collapse-head">
-    <span>Все поездки</span>
-    <strong>{{ (stats.recent|length)|plural("запись", "записи", "записей") }}</strong>
-  </div>
-  <div class="ride-log-list preview-list" data-collapse-preview="rides-full">
-    {% for ride in stats.recent[:3] %}
-      <article class="ride-item">
-        <span class="route-chip">{{ ride.route_number }}</span>
-        <div>
-          <strong>{{ ride.bus_number }}</strong>
-          <p>{{ ride.ridden_at|replace("T", " ") }}</p>
-          {% if ride.note %}
-            <p class="ride-note">{{ ride.note }}</p>
-          {% endif %}
-        </div>
-        <span class="ride-id">#{{ ride.id }}</span>
-      </article>
-    {% else %}
-      <p class="empty-state">Записей пока нет.</p>
-    {% endfor %}
-  </div>
-  <div class="ride-log-list full-list" id="rides-full" hidden>
-    {% for ride in stats.recent[3:] %}
-      <article class="ride-item">
-        <span class="route-chip">{{ ride.route_number }}</span>
-        <div>
-          <strong>{{ ride.bus_number }}</strong>
-          <p>{{ ride.ridden_at|replace("T", " ") }}</p>
-          {% if ride.note %}
-            <p class="ride-note">{{ ride.note }}</p>
-          {% endif %}
-        </div>
-        <span class="ride-id">#{{ ride.id }}</span>
-      </article>
-    {% endfor %}
-  </div>
-  {% if stats.recent|length > 3 %}
-    <button class="collapse-toggle" type="button" data-collapse-target="rides-full" aria-expanded="false">
-      <span data-more-text>Смотреть больше</span>
-    </button>
-  {% endif %}
 </section>
 
 <a class="logout-button" href="{{ url_for('logout') }}">Выход</a>

@@ -157,6 +157,169 @@ function expandList(target) {
   }, 300);
 }
 
+const rideModal = document.querySelector("[data-ride-modal]");
+const rideEditForm = document.querySelector("[data-ride-edit-form]");
+const editError = document.querySelector("[data-edit-error]");
+let activeRideCard = null;
+let modalCloseTimer = null;
+
+function setEditError(message) {
+  if (!editError) {
+    return;
+  }
+
+  editError.textContent = message || "";
+  editError.hidden = !message;
+}
+
+function openRideModal(card) {
+  if (!rideModal || !rideEditForm) {
+    return;
+  }
+
+  activeRideCard = card;
+  setEditError("");
+  rideEditForm.querySelector("[data-edit-id]").value = card.dataset.id;
+  rideEditForm.querySelector("[data-edit-route]").value = card.dataset.route || "";
+  rideEditForm.querySelector("[data-edit-bus]").value = card.dataset.bus || "";
+  rideEditForm.querySelector("[data-edit-note]").value = card.dataset.note || "";
+  rideEditForm.querySelector("[data-edit-ridden-at]").value = card.dataset.riddenAt || "";
+  rideModal.showModal();
+  window.clearTimeout(modalCloseTimer);
+  window.requestAnimationFrame(() => {
+    rideModal.classList.add("is-open");
+  });
+}
+
+function closeRideModal() {
+  if (rideModal?.open) {
+    rideModal.classList.remove("is-open");
+    modalCloseTimer = window.setTimeout(() => {
+      rideModal.close();
+      activeRideCard = null;
+    }, 220);
+  } else {
+    activeRideCard = null;
+  }
+}
+
+function forceCloseRideModal() {
+  if (rideModal?.open) {
+    window.clearTimeout(modalCloseTimer);
+    rideModal.classList.remove("is-open");
+    rideModal.close();
+  }
+  activeRideCard = null;
+}
+
+function formatRideDate(value) {
+  return value ? value.replace("T", " ") : "";
+}
+
+function updateRideCard(card, ride) {
+  card.dataset.route = ride.route_number;
+  card.dataset.bus = ride.bus_number;
+  card.dataset.note = ride.note || "";
+  card.dataset.riddenAt = ride.ridden_at.slice(0, 16);
+  card.querySelector(".route-chip").textContent = ride.route_number;
+  card.querySelector("[data-ride-bus]").textContent = ride.bus_number;
+  card.querySelector("[data-ride-date]").textContent = formatRideDate(ride.ridden_at);
+
+  const noteElement = card.querySelector("[data-ride-note]");
+  if (noteElement) {
+    noteElement.textContent = ride.note || "";
+    noteElement.hidden = !ride.note;
+  }
+}
+
+document.querySelectorAll("[data-edit-ride]").forEach((button) => {
+  button.addEventListener("click", () => {
+    const card = button.closest("[data-ride-card]");
+    if (card) {
+      openRideModal(card);
+    }
+  });
+});
+
+document.querySelector("[data-close-modal]")?.addEventListener("click", closeRideModal);
+
+rideModal?.addEventListener("click", (event) => {
+  if (event.target === rideModal) {
+    closeRideModal();
+  }
+});
+
+rideModal?.addEventListener("cancel", (event) => {
+  event.preventDefault();
+  closeRideModal();
+});
+
+rideEditForm?.addEventListener("submit", async (event) => {
+  event.preventDefault();
+
+  if (!activeRideCard) {
+    return;
+  }
+
+  setEditError("");
+  const rideId = rideEditForm.querySelector("[data-edit-id]").value;
+
+  try {
+    const response = await fetch(`/rides/${rideId}`, {
+      method: "PUT",
+      body: new FormData(rideEditForm),
+      headers: {
+        "Accept": "application/json",
+        "X-Requested-With": "fetch",
+      },
+    });
+    const result = await response.json();
+
+    if (!response.ok || !result.ok) {
+      setEditError(result.error || "Не получилось сохранить запись.");
+      return;
+    }
+
+    updateRideCard(activeRideCard, result.ride);
+    forceCloseRideModal();
+  } catch (_error) {
+    setEditError("Связь с сервером пропала. Попробуй еще раз.");
+  }
+});
+
+document.querySelector("[data-delete-ride]")?.addEventListener("click", async () => {
+  if (!activeRideCard) {
+    return;
+  }
+
+  const rideId = activeRideCard.dataset.id;
+  const confirmed = window.confirm(`Удалить запись #${rideId}?`);
+  if (!confirmed) {
+    return;
+  }
+
+  try {
+    const response = await fetch(`/rides/${rideId}`, {
+      method: "DELETE",
+      headers: {
+        "Accept": "application/json",
+        "X-Requested-With": "fetch",
+      },
+    });
+    const result = await response.json();
+
+    if (!response.ok || !result.ok) {
+      setEditError(result.error || "Не получилось удалить запись.");
+      return;
+    }
+
+    activeRideCard.remove();
+    forceCloseRideModal();
+  } catch (_error) {
+    setEditError("Связь с сервером пропала. Попробуй еще раз.");
+  }
+});
+
 function collapseList(target) {
   target.classList.add("is-animating");
   target.style.height = `${target.scrollHeight}px`;

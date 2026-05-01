@@ -1,0 +1,77 @@
+{% extends "base.html" %}
+{% block title %}Поездки - Автобусы{% endblock %}
+
+{% block content %}
+<section class="rides-page">
+  <div class="collapse-head">
+    <span>Поездки</span>
+    <strong>{{ (rides|length)|plural("запись", "записи", "записей") }}</strong>
+  </div>
+
+  <div class="ride-log-list editable-ride-list">
+    {% for ride in rides %}
+      <article
+        class="ride-item editable-ride"
+        data-ride-card
+        data-id="{{ ride.id }}"
+        data-route="{{ ride.route_number }}"
+        data-bus="{{ ride.bus_number }}"
+        data-note="{{ ride.note or '' }}"
+        data-ridden-at="{{ ride.ridden_at|datetime_local }}"
+      >
+        <span class="route-chip">{{ ride.route_number }}</span>
+        <div class="ride-main">
+          <strong data-ride-bus>{{ ride.bus_number }}</strong>
+          <p data-ride-date>{{ ride.ridden_at|replace("T", " ") }}</p>
+          {% if ride.note %}
+            <p class="ride-note" data-ride-note>{{ ride.note }}</p>
+          {% else %}
+            <p class="ride-note" data-ride-note hidden></p>
+          {% endif %}
+        </div>
+        <span class="ride-id">#{{ ride.id }}</span>
+        <button class="edit-ride-button" type="button" aria-label="Редактировать запись #{{ ride.id }}" data-edit-ride>✎</button>
+      </article>
+    {% else %}
+      <p class="empty-state">Записей пока нет.</p>
+    {% endfor %}
+  </div>
+</section>
+
+<dialog class="ride-modal" data-ride-modal>
+  <form class="ride-edit-form" method="dialog" data-ride-edit-form>
+    <div class="modal-head">
+      <h2>Редактировать поездку</h2>
+      <button class="modal-close" type="button" aria-label="Закрыть" data-close-modal>×</button>
+    </div>
+
+    <input type="hidden" name="ride_id" data-edit-id>
+
+    <label>
+      <span>Маршрут</span>
+      <input name="route_number" maxlength="16" required data-edit-route>
+    </label>
+    <label>
+      <span>Серийный номер автобуса</span>
+      <input name="bus_number" maxlength="32" required data-edit-bus>
+    </label>
+    <label>
+      <span>Дата и время</span>
+      <input name="ridden_at" type="datetime-local" required data-edit-ridden-at>
+    </label>
+    <label>
+      <span>Заметка</span>
+      <textarea name="note" maxlength="240" data-edit-note></textarea>
+    </label>
+
+    <p class="form-error" data-edit-error hidden></p>
+
+    <div class="modal-actions">
+      <button class="danger-button" type="button" data-delete-ride>Удалить</button>
+      <button class="primary-button modal-save" type="submit">
+        <span>Сохранить</span>
+      </button>
+    </div>
+  </form>
+</dialog>
+{% endblock %}

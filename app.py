@@ -24,6 +24,7 @@ def create_app():
     app.config["SECRET_KEY"] = os.environ.get("FLASK_SECRET_KEY", "local-bus-collector-key")
     app.config["BUS_GAME_SECRET"] = os.environ.get("BUS_GAME_SECRET", "dev-secret")
     app.jinja_env.filters["profile_day"] = format_profile_day
+    app.jinja_env.filters["datetime_local"] = format_datetime_local
     app.jinja_env.filters["plural"] = pluralize
     app.jinja_env.filters["plural_word"] = plural_word
 
@@ -108,6 +109,53 @@ def create_app():
     def stats():
         return render_template("stats.html", active_page="profile", stats=collect_stats(detailed=True))
 
+    @app.route("/rides")
+    @require_auth
+    def rides():
+        all_rides = g.db.execute(
+            """
+            SELECT id, route_number, bus_number, note, ridden_at
+            FROM rides
+            ORDER BY ridden_at DESC, id DESC
+            """
+        ).fetchall()
+        return render_template("rides.html", active_page="rides", rides=all_rides)
+
+    @app.route("/rides/<int:ride_id>", methods=["PUT", "DELETE"])
+    @require_auth
+    def ride_detail(ride_id):
+        ride = get_ride(ride_id)
+        if ride is None:
+            return jsonify({"ok": False, "error": "Запись не найдена."}), 404
+
+        if request.method == "DELETE":
+            g.db.execute("DELETE FROM rides WHERE id = ?", (ride_id,))
+            g.db.commit()
+            return jsonify({"ok": True})
+
+        route_number = normalize_field(request.form.get("route_number"))
+        bus_number = normalize_field(request.form.get("bus_number"))
+        note = normalize_note(request.form.get("note"))
+
+        try:
+            ridden_at = parse_ride_datetime(request.form.get("ridden_at"))
+        except ValueError:
+            return jsonify({"ok": False, "error": "Укажи корректную дату и время."}), 400
+
+        if not route_number or not bus_number:
+            return jsonify({"ok": False, "error": "Заполни маршрут и серийный номер автобуса."}), 400
+
+        g.db.execute(
+            """
+            UPDATE rides
+            SET route_number = ?, bus_number = ?, note = ?, ridden_at = ?
+            WHERE id = ?
+            """,
+            (route_number, bus_number, note, ridden_at, ride_id),
+        )
+        g.db.commit()
+        return jsonify({"ok": True, "ride": serialize_ride(get_ride(ride_id))})
+
     return app
 
 
@@ -161,6 +209,19 @@ def normalize_note(value):
     return note or None
 
 
+def parse_ride_datetime(value):
+    value = (value or "").strip()
+    if not value:
+        raise ValueError("empty datetime")
+
+    try:
+        parsed = datetime.fromisoformat(value)
+    except ValueError as error:
+        raise ValueError("invalid datetime") from error
+
+    return parsed.replace(microsecond=0).isoformat()
+
+
 def wants_json_response():
     return (
         request.headers.get("X-Requested-With") == "fetch"
@@ -187,6 +248,13 @@ def format_profile_day(value):
     if day.year == datetime.now().year:
         return day.strftime("%d.%m")
     return day.strftime("%d.%m.%Y")
+
+
+def format_datetime_local(value):
+    try:
+        return datetime.fromisoformat(value).strftime("%Y-%m-%dT%H:%M")
+    except (TypeError, ValueError):
+        return ""
 
 
 def pluralize(value, one, few, many):
@@ -242,7 +310,6 @@ def collect_stats(detailed=False):
         FROM rides
         GROUP BY route_number
         ORDER BY total DESC, route_number ASC
-        LIMIT 6
         """
     ).fetchall()
 
@@ -252,7 +319,6 @@ def collect_stats(detailed=False):
         FROM rides
         GROUP BY bus_number
         ORDER BY total DESC, bus_number ASC
-        LIMIT 6
         """
     ).fetchall()
 
@@ -279,7 +345,6 @@ def collect_stats(detailed=False):
             FROM rides
             GROUP BY DATE(ridden_at)
             ORDER BY day DESC
-            LIMIT 14
             """
         ).fetchall()
         stats["recent"] = g.db.execute(

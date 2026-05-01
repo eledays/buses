@@ -4,3 +4,4 @@ __pycache__/
 buses.sqlite3
 instance/
 .codex
+*.csv
