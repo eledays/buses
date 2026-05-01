@@ -2,6 +2,7 @@ import os
 import sqlite3
 from datetime import datetime
 from functools import wraps
+from dotenv import load_dotenv
 
 from flask import (
     Flask,
@@ -14,6 +15,7 @@ from flask import (
     url_for,
 )
 
+load_dotenv()
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 DATABASE = os.path.join(BASE_DIR, "buses.sqlite3")
@@ -21,8 +23,8 @@ DATABASE = os.path.join(BASE_DIR, "buses.sqlite3")
 
 def create_app():
     app = Flask(__name__)
-    app.config["SECRET_KEY"] = os.environ.get("FLASK_SECRET_KEY", "local-bus-collector-key")
-    app.config["BUS_GAME_SECRET"] = os.environ.get("BUS_GAME_SECRET", "dev-secret")
+    app.config["SECRET_KEY"] = os.getenv("FLASK_SECRET_KEY", "local-bus-collector-key")
+    app.config["BUS_GAME_SECRET"] = os.getenv("BUS_GAME_SECRET", "dev-secret")
     app.jinja_env.filters["profile_day"] = format_profile_day
     app.jinja_env.filters["datetime_local"] = format_datetime_local
     app.jinja_env.filters["plural"] = pluralize
@@ -163,7 +165,7 @@ def require_auth(view):
     @wraps(view)
     def wrapped(*args, **kwargs):
         if not session.get("authorized"):
-            return redirect(url_for("locked"))
+            return render_template("locked.html")
         return view(*args, **kwargs)
 
     return wrapped
