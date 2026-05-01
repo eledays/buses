@@ -5,59 +5,93 @@
 <section class="metric-strip">
   <div>
     <strong>{{ stats.totals.rides or 0 }}</strong>
-    <span>поездки</span>
+    <span>{{ (stats.totals.rides or 0)|plural_word("поездка", "поездки", "поездок") }}</span>
   </div>
   <div>
     <strong>{{ stats.totals.routes or 0 }}</strong>
-    <span>маршруты</span>
+    <span>{{ (stats.totals.routes or 0)|plural_word("маршрут", "маршрута", "маршрутов") }}</span>
   </div>
   <div>
     <strong>{{ stats.totals.buses or 0 }}</strong>
-    <span>автобусы</span>
+    <span>{{ (stats.totals.buses or 0)|plural_word("автобус", "автобуса", "автобусов") }}</span>
   </div>
 </section>
 
 <section class="profile-grid">
-  <div class="section-block">
-    <div class="section-head"><h2>Топ маршрутов</h2></div>
+  <section class="section-block collapsible-block">
+    <div class="collapse-head">
+      <span>Топ маршрутов</span>
+      <strong>{{ (stats.top_routes|length)|plural("позиция", "позиции", "позиций") }}</strong>
+    </div>
     {% if stats.top_routes %}
-      <ol class="rating-list route-rating">
-      {% for route in stats.top_routes %}
+      <ol class="rating-list route-rating preview-list" data-collapse-preview="routes-full">
+      {% for route in stats.top_routes[:3] %}
         <li class="rating-item {{ 'is-leader' if loop.first else '' }}">
           <span class="rating-place">{{ loop.index }}.</span>
           <span class="rating-value">{{ route.route_number }}</span>
-          <span class="rating-count">- {{ route.total }} поездок</span>
+          <span class="rating-count">- {{ route.total|plural("поездка", "поездки", "поездок") }}</span>
         </li>
       {% endfor %}
       </ol>
+      <ol class="rating-list route-rating full-list" id="routes-full" hidden>
+      {% for route in stats.top_routes[3:] %}
+        <li class="rating-item">
+          <span class="rating-place">{{ loop.index + 3 }}.</span>
+          <span class="rating-value">{{ route.route_number }}</span>
+          <span class="rating-count">{{ route.total|plural("поездка", "поездки", "поездок") }}</span>
+        </li>
+      {% endfor %}
+      </ol>
+      {% if stats.top_routes|length > 3 %}
+        <button class="collapse-toggle" type="button" data-collapse-target="routes-full" aria-expanded="false">
+          <span data-more-text>Смотреть больше</span>
+        </button>
+      {% endif %}
     {% else %}
       <p class="empty-state">Нет данных для рейтинга.</p>
     {% endif %}
-  </div>
+  </section>
 
-  <div class="section-block">
-    <div class="section-head"><h2>Топ автобусов</h2></div>
+  <section class="section-block collapsible-block">
+    <div class="collapse-head">
+      <span>Топ автобусов</span>
+      <strong>{{ (stats.top_buses|length)|plural("позиция", "позиции", "позиций") }}</strong>
+    </div>
     {% if stats.top_buses %}
-      <ol class="rating-list bus-rating">
-      {% for bus in stats.top_buses %}
+      <ol class="rating-list bus-rating preview-list" data-collapse-preview="buses-full">
+      {% for bus in stats.top_buses[:3] %}
         <li class="rating-item {{ 'is-leader' if loop.first else '' }}">
           <span class="rating-place">{{ loop.index }}.</span>
           <span class="rating-value">{{ bus.bus_number }}</span>
-          <span class="rating-count">- {{ bus.total }} поездок</span>
+          <span class="rating-count">- {{ bus.total|plural("поездка", "поездки", "поездок") }}</span>
         </li>
       {% endfor %}
       </ol>
+      <ol class="rating-list bus-rating full-list" id="buses-full" hidden>
+      {% for bus in stats.top_buses[3:] %}
+        <li class="rating-item">
+          <span class="rating-place">{{ loop.index + 3 }}.</span>
+          <span class="rating-value">{{ bus.bus_number }}</span>
+          <span class="rating-count">{{ bus.total|plural("поездка", "поездки", "поездок") }}</span>
+        </li>
+      {% endfor %}
+      </ol>
+      {% if stats.top_buses|length > 3 %}
+        <button class="collapse-toggle" type="button" data-collapse-target="buses-full" aria-expanded="false">
+          <span data-more-text>Смотреть больше</span>
+        </button>
+      {% endif %}
     {% else %}
       <p class="empty-state">Нет данных для рейтинга.</p>
     {% endif %}
-  </div>
+  </section>
 </section>
 
 <section class="section-block wide-block collapsible-block activity-log">
-  <button class="collapse-toggle" type="button" data-collapse-target="activity-full" aria-expanded="false">
+  <div class="collapse-head">
     <span>Активность по дням</span>
-    <strong>{{ stats.timeline|length }}</strong>
-  </button>
+    <strong>{{ (stats.timeline|length)|plural("день", "дня", "дней") }}</strong>
+  </div>
   <div class="timeline preview-list" data-collapse-preview="activity-full">
     {% for day in stats.timeline[:3] %}
       <div class="timeline-day">
@@ -69,22 +103,25 @@
     {% endfor %}
   </div>
   <div class="timeline full-list" id="activity-full" hidden>
-    {% for day in stats.timeline %}
+    {% for day in stats.timeline[3:] %}
       <div class="timeline-day">
         <span>{{ day.day|profile_day }}</span>
         <strong>{{ day.total }}</strong>
       </div>
-    {% else %}
-      <p class="empty-state">Календарь оживет после первой поездки.</p>
     {% endfor %}
   </div>
+  {% if stats.timeline|length > 3 %}
+    <button class="collapse-toggle" type="button" data-collapse-target="activity-full" aria-expanded="false">
+      <span data-more-text>Смотреть больше</span>
+    </button>
+  {% endif %}
 </section>
 
 <section class="section-block wide-block collapsible-block ride-log">
-  <button class="collapse-toggle" type="button" data-collapse-target="rides-full" aria-expanded="false">
+  <div class="collapse-head">
     <span>Все поездки</span>
-    <strong>{{ stats.recent|length }}</strong>
-  </button>
+    <strong>{{ (stats.recent|length)|plural("запись", "записи", "записей") }}</strong>
+  </div>
   <div class="ride-log-list preview-list" data-collapse-preview="rides-full">
     {% for ride in stats.recent[:3] %}
       <article class="ride-item">
@@ -100,7 +137,7 @@
     {% endfor %}
   </div>
   <div class="ride-log-list full-list" id="rides-full" hidden>
-    {% for ride in stats.recent %}
+    {% for ride in stats.recent[3:] %}
       <article class="ride-item">
         <span class="route-chip">{{ ride.route_number }}</span>
         <div>
@@ -109,10 +146,13 @@
         </div>
         <span class="ride-id">#{{ ride.id }}</span>
       </article>
-    {% else %}
-      <p class="empty-state">Записей пока нет.</p>
     {% endfor %}
   </div>
+  {% if stats.recent|length > 3 %}
+    <button class="collapse-toggle" type="button" data-collapse-target="rides-full" aria-expanded="false">
+      <span data-more-text>Смотреть больше</span>
+    </button>
+  {% endif %}
 </section>
 
 <a class="logout-button" href="{{ url_for('logout') }}">Выход</a>

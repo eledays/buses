@@ -24,6 +24,8 @@ def create_app():
     app.config["SECRET_KEY"] = os.environ.get("FLASK_SECRET_KEY", "local-bus-collector-key")
     app.config["BUS_GAME_SECRET"] = os.environ.get("BUS_GAME_SECRET", "dev-secret")
     app.jinja_env.filters["profile_day"] = format_profile_day
+    app.jinja_env.filters["plural"] = pluralize
+    app.jinja_env.filters["plural_word"] = plural_word
 
     @app.before_request
     def open_database():
@@ -165,6 +167,31 @@ def format_profile_day(value):
     if day.year == datetime.now().year:
         return day.strftime("%d.%m")
     return day.strftime("%d.%m.%Y")
+
+
+def pluralize(value, one, few, many):
+    return f"{value} {plural_word(value, one, few, many)}"
+
+
+def plural_word(value, one, few, many):
+    try:
+        number = abs(int(value))
+    except (TypeError, ValueError):
+        number = 0
+
+    last_two = number % 100
+    last = number % 10
+
+    if 11 <= last_two <= 14:
+        word = many
+    elif last == 1:
+        word = one
+    elif 2 <= last <= 4:
+        word = few
+    else:
+        word = many
+
+    return word
 
 
 def get_ride(ride_id):

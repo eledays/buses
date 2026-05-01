@@ -120,7 +120,7 @@ document.querySelectorAll("[data-collapse-target]").forEach((button) => {
   button.addEventListener("click", () => {
     const targetId = button.dataset.collapseTarget;
     const target = document.getElementById(targetId);
-    const preview = document.querySelector(`[data-collapse-preview="${targetId}"]`);
+    const label = button.querySelector("[data-more-text]");
 
     if (!target) {
       return;
@@ -128,10 +128,47 @@ document.querySelectorAll("[data-collapse-target]").forEach((button) => {
 
     const isOpen = button.getAttribute("aria-expanded") === "true";
     button.setAttribute("aria-expanded", String(!isOpen));
-    target.hidden = isOpen;
 
-    if (preview) {
-      preview.hidden = !isOpen;
+    if (label) {
+      label.textContent = isOpen ? "Смотреть больше" : "Свернуть";
+    }
+
+    if (isOpen) {
+      collapseList(target);
+    } else {
+      expandList(target);
     }
   });
 });
+
+function expandList(target) {
+  target.hidden = false;
+  target.classList.add("is-animating");
+  target.style.height = "0px";
+  target.style.opacity = "0";
+  void target.offsetHeight;
+  target.style.height = `${target.scrollHeight}px`;
+  target.style.opacity = "1";
+
+  window.setTimeout(() => {
+    target.classList.remove("is-animating");
+    target.style.height = "";
+    target.style.opacity = "";
+  }, 300);
+}
+
+function collapseList(target) {
+  target.classList.add("is-animating");
+  target.style.height = `${target.scrollHeight}px`;
+  target.style.opacity = "1";
+  void target.offsetHeight;
+  target.style.height = "0px";
+  target.style.opacity = "0";
+
+  window.setTimeout(() => {
+    target.hidden = true;
+    target.classList.remove("is-animating");
+    target.style.height = "";
+    target.style.opacity = "";
+  }, 300);
+}
