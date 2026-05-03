@@ -99,7 +99,7 @@ if (rideForm && primaryButton) {
         return;
       }
 
-      animateRecordButton(result.ride.id);
+      animateRecordButton(result.ride);
       rideForm.reset();
     } catch (_error) {
       setFormError("Связь с сервером пропала. Попробуй еще раз.");

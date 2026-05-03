@@ -41,7 +41,7 @@ def close_database(_error=None):
 @bp.route("/", methods=["GET", "POST"])
 @require_auth
 def index():
-    latest_record = None
+    ride_number = None
     error = None
 
     if request.method == "POST":
@@ -54,19 +54,20 @@ def index():
             if wants_json_response():
                 return jsonify({"ok": False, "error": error}), 400
         else:
-            ride_id = add_ride(g.db, route_number, bus_number, note)
-            latest_record = get_ride(g.db, ride_id)
+            ride_number = add_ride(g.db, route_number, bus_number, note)
             if wants_json_response():
-                return jsonify({"ok": True, "ride": serialize_ride(latest_record)})
+                return jsonify({"ok": True, "ride": ride_number})
 
     recent_rides = get_recent_rides(g.db)
     stats = collect_stats(g.db)
+
+    print(ride_number)
 
     return render_template(
         "index.html",
         active_page="entry",
         error=error,
-        latest_record=latest_record,
+        ride_number=ride_number,
         recent_rides=recent_rides,
         stats=stats,
     )

@@ -20,9 +20,9 @@
         <textarea name="note" placeholder="Заметки" maxlength="240"></textarea>
       </label>
       <p class="form-error" data-form-error {% if not error %}hidden{% endif %}>{{ error or "" }}</p>
-      <button class="primary-button" type="submit" data-record="{{ latest_record.id if latest_record else '' }}">
+      <button class="primary-button" type="submit" data-record="{{ ride_number if ride_number else '' }}">
         <span class="button-label">Записать</span>
-        <span class="button-record" aria-hidden="true">#{{ latest_record.id if latest_record else '' }}</span>
+        <span class="button-record" aria-hidden="true">#{{ ride_number if ride_number else '' }}</span>
       </button>
     </form>
   </div>

@@ -107,7 +107,10 @@ def add_ride(db, route_number, bus_number, note) -> int:
         (route_number, bus_number, note, now.isoformat()),
     )
     db.commit()
-    return cursor.lastrowid
+    
+    count_cursor = db.execute("SELECT COUNT(*) FROM rides")
+    total_count = count_cursor.fetchone()[0]
+    return total_count
 
 
 def get_all_rides(db) -> list:
