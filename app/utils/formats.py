@@ -72,7 +72,7 @@ def format_datetime_local(value, tz="Europe/Moscow"):
     try:
         dt = datetime.fromisoformat(value)
         dt = dt.astimezone(ZoneInfo(tz))
-        return datetime.fromisoformat(value).strftime("%d.%m.%Y %H:%M")
+        return dt.strftime("%d.%m.%Y %H:%M")
     except (TypeError, ValueError):
         return ""
 
