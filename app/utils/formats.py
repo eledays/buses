@@ -1,4 +1,5 @@
 from datetime import datetime
+from zoneinfo import ZoneInfo
 
 from flask import request
 
@@ -67,9 +68,11 @@ def format_profile_day(value):
     return day.strftime("%d.%m.%Y")
 
 
-def format_datetime_local(value):
+def format_datetime_local(value, tz="Europe/Moscow"):
     try:
-        return datetime.fromisoformat(value).strftime("%Y-%m-%dT%H:%M")
+        dt = datetime.fromisoformat(value)
+        dt = dt.astimezone(ZoneInfo(tz))
+        return datetime.fromisoformat(value).strftime("%d.%m.%Y %H:%M")
     except (TypeError, ValueError):
         return ""
 
