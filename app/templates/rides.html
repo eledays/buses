@@ -17,12 +17,12 @@
         data-route="{{ ride.route_number }}"
         data-bus="{{ ride.bus_number }}"
         data-note="{{ ride.note or '' }}"
-        data-ridden-at="{{ ride.ridden_at|datetime_local }}"
+        data-ridden-at="{{ ride.ridden_at|datetime_input }}"
       >
         <span class="route-chip">{{ ride.route_number }}</span>
         <div class="ride-main">
           <strong data-ride-bus>{{ ride.bus_number }}</strong>
-          <p data-ride-date>{{ ride.ridden_at|replace("T", " ") }}</p>
+          <p data-ride-date>{{ ride.ridden_at|datetime_local }}</p>
           {% if ride.note %}
             <p class="ride-note" data-ride-note>{{ ride.note }}</p>
           {% else %}

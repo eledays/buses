@@ -213,10 +213,10 @@ function updateRideCard(card, ride) {
   card.dataset.route = ride.route_number;
   card.dataset.bus = ride.bus_number;
   card.dataset.note = ride.note || "";
-  card.dataset.riddenAt = ride.ridden_at.slice(0, 16);
+  card.dataset.riddenAt = ride.ridden_at_input || ride.ridden_at.slice(0, 16);
   card.querySelector(".route-chip").textContent = ride.route_number;
   card.querySelector("[data-ride-bus]").textContent = ride.bus_number;
-  card.querySelector("[data-ride-date]").textContent = formatRideDate(ride.ridden_at);
+  card.querySelector("[data-ride-date]").textContent = ride.ridden_at_display || formatRideDate(ride.ridden_at);
 
   const noteElement = card.querySelector("[data-ride-note]");
   if (noteElement) {

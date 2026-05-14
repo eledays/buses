@@ -1,5 +1,5 @@
 from app.utils.formats import (
-    format_datetime_local, format_profile_day, plural_word, pluralize
+    format_datetime_input, format_datetime_local, format_profile_day, plural_word, pluralize
 )
 
 from flask import Flask
@@ -13,6 +13,7 @@ def create_app():
     
     app.jinja_env.filters["profile_day"] = format_profile_day
     app.jinja_env.filters["datetime_local"] = format_datetime_local
+    app.jinja_env.filters["datetime_input"] = format_datetime_input
     app.jinja_env.filters["plural"] = pluralize
     app.jinja_env.filters["plural_word"] = plural_word
 

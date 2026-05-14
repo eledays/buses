@@ -1,7 +1,9 @@
-from datetime import datetime
+from datetime import UTC, datetime
 from zoneinfo import ZoneInfo
 
 from flask import request
+
+LOCAL_TZ = ZoneInfo("Europe/Moscow")
 
 
 def normalize_field(value):
@@ -37,7 +39,17 @@ def parse_ride_datetime(value):
     except ValueError as error:
         raise ValueError("invalid datetime") from error
 
-    return parsed.replace(microsecond=0).isoformat()
+    if parsed.tzinfo is None:
+        parsed = parsed.replace(tzinfo=LOCAL_TZ)
+
+    return parsed.astimezone(UTC).replace(microsecond=0).isoformat()
+
+
+def parse_stored_datetime(value):
+    dt = datetime.fromisoformat(value)
+    if dt.tzinfo is None:
+        dt = dt.replace(tzinfo=UTC)
+    return dt
 
 
 def wants_json_response():
@@ -54,25 +66,34 @@ def serialize_ride(ride):
         "bus_number": ride["bus_number"],
         "note": ride["note"],
         "ridden_at": ride["ridden_at"],
+        "ridden_at_display": format_datetime_local(ride["ridden_at"]),
+        "ridden_at_input": format_datetime_input(ride["ridden_at"]),
     }
 
 
 def format_profile_day(value):
     try:
-        day = datetime.fromisoformat(value)
+        day = parse_stored_datetime(value).astimezone(LOCAL_TZ)
     except (TypeError, ValueError):
         return value
 
-    if day.year == datetime.now().year:
+    if day.year == datetime.now(LOCAL_TZ).year:
         return day.strftime("%d.%m")
     return day.strftime("%d.%m.%Y")
 
 
-def format_datetime_local(value, tz="Europe/Moscow"):
+def format_datetime_local(value):
     try:
-        dt = datetime.fromisoformat(value)
-        dt = dt.astimezone(ZoneInfo(tz))
+        dt = parse_stored_datetime(value).astimezone(LOCAL_TZ)
         return dt.strftime("%d.%m.%Y %H:%M")
+    except (TypeError, ValueError):
+        return ""
+
+
+def format_datetime_input(value):
+    try:
+        dt = parse_stored_datetime(value).astimezone(LOCAL_TZ)
+        return dt.strftime("%Y-%m-%dT%H:%M")
     except (TypeError, ValueError):
         return ""
 

@@ -1,5 +1,5 @@
 from flask import g
-from datetime import datetime
+from datetime import UTC, datetime
 from typing import Optional, List, Tuple
 
 
@@ -98,7 +98,7 @@ def collect_stats(db, detailed=False):
 
 
 def add_ride(db, route_number, bus_number, note) -> int:
-    now = datetime.now().replace(microsecond=0)
+    now = datetime.now(UTC).replace(microsecond=0)
     cursor = db.execute(
         """
         INSERT INTO rides (route_number, bus_number, note, ridden_at)
