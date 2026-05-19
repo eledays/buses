@@ -38,6 +38,27 @@
         <span class="button-record" aria-hidden="true">#{{ ride_number if ride_number else '' }}</span>
       </button>
     </form>
+
+    <section class="recent-entry-block" aria-labelledby="recent-entry-title">
+      <div class="recent-entry-head">
+        <h2 id="recent-entry-title">Последние поездки</h2>
+        <a href="{{ url_for('main.rides') }}">Все</a>
+      </div>
+      <div class="recent-entry-list" data-recent-rides>
+        {% for ride in recent_rides[:5] %}
+          <article class="recent-entry-item">
+            <span class="route-chip">{{ ride.route_number }}</span>
+            <div>
+              <strong>{{ ride.bus_number }}</strong>
+              <p>{{ ride.ridden_at|datetime_local }}</p>
+            </div>
+            <span class="ride-id">#{{ ride.record_number }}</span>
+          </article>
+        {% else %}
+          <p class="empty-state" data-recent-empty>Записей пока нет.</p>
+        {% endfor %}
+      </div>
+    </section>
   </div>
 </section>
 

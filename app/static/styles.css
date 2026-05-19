@@ -254,6 +254,62 @@ h3 {
   color: rgba(202, 255, 223, 0.82);
 }
 
+.recent-entry-block {
+  margin-top: 48px;
+}
+
+.recent-entry-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 12px;
+}
+
+.recent-entry-head h2 {
+  font-size: 18px;
+}
+
+.recent-entry-head a {
+  color: var(--cyan);
+  font-size: 13px;
+  font-weight: 800;
+}
+
+.recent-entry-list {
+  display: grid;
+  gap: 8px;
+}
+
+.recent-entry-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-width: 0;
+  padding: 10px;
+  border: 1px solid rgba(146, 165, 183, 0.14);
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.035);
+}
+
+.recent-entry-item div {
+  min-width: 0;
+  flex: 1;
+}
+
+.recent-entry-item strong,
+.recent-entry-item p {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.recent-entry-item p {
+  margin: 3px 0 0;
+  color: var(--muted);
+  font-size: 12px;
+}
+
 label span {
   display: block;
   margin-bottom: 8px;

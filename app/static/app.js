@@ -3,6 +3,7 @@ const primaryButton = document.querySelector(".primary-button");
 const rideForm = document.querySelector(".ride-form");
 const formError = document.querySelector("[data-form-error]");
 const buttonRecord = document.querySelector(".button-record");
+const recentRidesList = document.querySelector("[data-recent-rides]");
 const csrfToken = document.querySelector('meta[name="csrf-token"]')?.content || "";
 let buttonTimers = [];
 let pageGlowTimer = null;
@@ -74,6 +75,49 @@ function animateRecordButton(recordId) {
   }, 3900));
 }
 
+function formatRecentDate(date) {
+  return new Intl.DateTimeFormat("ru-RU", {
+    day: "2-digit",
+    month: "2-digit",
+    year: "numeric",
+    hour: "2-digit",
+    minute: "2-digit",
+  }).format(date);
+}
+
+function prependRecentRide(recordId, formData) {
+  if (!recentRidesList) {
+    return;
+  }
+
+  recentRidesList.querySelector("[data-recent-empty]")?.remove();
+
+  const item = document.createElement("article");
+  item.className = "recent-entry-item";
+
+  const routeChip = document.createElement("span");
+  routeChip.className = "route-chip";
+  routeChip.textContent = formData.get("route_number") || "";
+
+  const main = document.createElement("div");
+  const bus = document.createElement("strong");
+  bus.textContent = formData.get("bus_number") || "";
+  const date = document.createElement("p");
+  date.textContent = formatRecentDate(new Date());
+  main.append(bus, date);
+
+  const record = document.createElement("span");
+  record.className = "ride-id";
+  record.textContent = `#${recordId}`;
+
+  item.append(routeChip, main, record);
+  recentRidesList.prepend(item);
+
+  while (recentRidesList.querySelectorAll(".recent-entry-item").length > 5) {
+    recentRidesList.querySelector(".recent-entry-item:last-of-type")?.remove();
+  }
+}
+
 if (primaryButton && primaryButton.dataset.record) {
   animateRecordButton(primaryButton.dataset.record);
 }
@@ -85,9 +129,10 @@ if (rideForm && primaryButton) {
     primaryButton.disabled = true;
 
     try {
+      const formData = new FormData(rideForm);
       const response = await fetch(rideForm.action || window.location.pathname, {
         method: "POST",
-        body: new FormData(rideForm),
+        body: formData,
         headers: {
           "Accept": "application/json",
           "X-CSRF-Token": csrfToken,
@@ -102,6 +147,7 @@ if (rideForm && primaryButton) {
       }
 
       animateRecordButton(result.ride);
+      prependRecentRide(result.ride, formData);
       rideForm.reset();
     } catch (_error) {
       setFormError("Связь с сервером пропала. Попробуй еще раз.");

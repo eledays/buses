@@ -259,9 +259,18 @@ def get_recent_rides(db, owner) -> list:
     clause, params = owner_filter(owner)
     cursor = db.execute(
         f"""
-        SELECT id, route_number, bus_number, note, ridden_at
-        FROM rides
-        WHERE {clause}
+        SELECT id, route_number, bus_number, note, ridden_at, record_number
+        FROM (
+            SELECT
+                id,
+                route_number,
+                bus_number,
+                note,
+                ridden_at,
+                ROW_NUMBER() OVER (ORDER BY id ASC) AS record_number
+            FROM rides
+            WHERE {clause}
+        )
         ORDER BY ridden_at DESC, id DESC
         LIMIT 10
         """,
