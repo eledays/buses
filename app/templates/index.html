@@ -4,6 +4,18 @@
 {% block content %}
 <section class="hero-grid">
   <div class="entry-panel">
+    {% if is_guest %}
+      <div class="guest-notice">
+        <strong>Вход не выполнен</strong>
+        <span>Поездки сохраняются только в этом браузере и могут потеряться. Чтобы закрепить их за собой, войди через Яндекс.</span>
+        <a href="{{ url_for('auth.login') }}">Войти</a>
+      </div>
+    {% elif session.get("claimed_rides") %}
+      <div class="guest-notice success-notice">
+        <strong>Готово.</strong>
+        <span>{{ session.pop("claimed_rides")|plural("гостевая поездка перенесена", "гостевые поездки перенесены", "гостевых поездок перенесено") }} в аккаунт.</span>
+      </div>
+    {% endif %}
 
     <form class="ride-form" method="post" autocomplete="off">
       <div class="numbers-row">

@@ -1,45 +1,23 @@
-from app.utils.auth import require_auth, check_ml_token
 from app.utils.db import (
-    init_db, get_ride, collect_stats, add_ride, get_all_rides,
+    get_ride, collect_stats, add_ride, get_all_rides,
     get_recent_rides, delete_ride, update_ride
 )
 from app.utils.formats import (
     normalize_field, normalize_note, parse_ride_datetime, 
     serialize_ride, wants_json_response
 )
-from config import Config
-
-import sqlite3
-
 from flask import (
     Blueprint,
     g,
     jsonify,
     render_template,
     request,
-    session,
-    redirect
 )
 
 bp = Blueprint('main', __name__)
 
 
-@bp.before_request
-def open_database():
-    g.db = sqlite3.connect(Config.DATABASE)
-    g.db.row_factory = sqlite3.Row
-    init_db(g.db)
-
-
-@bp.teardown_request
-def close_database(_error=None):
-    db = g.pop("db", None)
-    if db is not None:
-        db.close()
-
-
 @bp.route("/", methods=["GET", "POST"])
-@require_auth
 def index():
     ride_number = None
     error = None
@@ -54,14 +32,12 @@ def index():
             if wants_json_response():
                 return jsonify({"ok": False, "error": error}), 400
         else:
-            ride_number = add_ride(g.db, route_number, bus_number, note)
+            ride_number = add_ride(g.db, g.owner, route_number, bus_number, note)
             if wants_json_response():
                 return jsonify({"ok": True, "ride": ride_number})
 
-    recent_rides = get_recent_rides(g.db)
-    stats = collect_stats(g.db)
-
-    print(ride_number)
+    recent_rides = get_recent_rides(g.db, g.owner)
+    stats = collect_stats(g.db, g.owner)
 
     return render_template(
         "index.html",
@@ -74,28 +50,25 @@ def index():
 
 
 @bp.route("/stats")
-@require_auth
 def stats():
-    stats = collect_stats(g.db, detailed=True)
+    stats = collect_stats(g.db, g.owner, detailed=True)
     return render_template("stats.html", active_page="profile", stats=stats)
 
 
 @bp.route("/rides")
-@require_auth
 def rides():
-    all_rides = get_all_rides(g.db)
+    all_rides = get_all_rides(g.db, g.owner)
     return render_template("rides.html", active_page="rides", rides=all_rides)
 
 
 @bp.route("/rides/<int:ride_id>", methods=["PUT", "DELETE"])
-@require_auth
 def ride_detail(ride_id):
-    ride = get_ride(g.db, ride_id)
+    ride = get_ride(g.db, g.owner, ride_id)
     if ride is None:
         return jsonify({"ok": False, "error": "Запись не найдена."}), 404
 
     if request.method == "DELETE":
-        delete_ride(g.db, ride_id)
+        delete_ride(g.db, g.owner, ride_id)
         return jsonify({"ok": True})
 
     route_number = normalize_field(request.form.get("route_number"))
@@ -110,5 +83,5 @@ def ride_detail(ride_id):
     if not route_number or not bus_number:
         return jsonify({"ok": False, "error": "Заполни маршрут и серийный номер автобуса."}), 400
 
-    update_ride(g.db, ride_id, route_number, bus_number, note, ridden_at)
-    return jsonify({"ok": True, "ride": serialize_ride(get_ride(g.db, ride_id))})
+    update_ride(g.db, g.owner, ride_id, route_number, bus_number, note, ridden_at)
+    return jsonify({"ok": True, "ride": serialize_ride(get_ride(g.db, g.owner, ride_id))})

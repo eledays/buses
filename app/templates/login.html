@@ -3,14 +3,14 @@
 
 {% block content %}
 <div class="login-container">
-    <h1>Вход</h1>
+    <h1>Вход через Яндекс</h1>
+    <p>Аккаунт закрепит поездки за тобой, чтобы они не пропали при смене браузера или очистке cookies.</p>
     {% if error %}
     <p class="error">{{ error }}</p>
     {% endif %}
-    <form method="POST">
-        <label for="token">Токен:</label>
-        <input type="text" id="token" name="token" required>
-        <button type="submit" class="primary-button">Войти</button>
-    </form>
+    <a class="primary-button login-button" href="{{ url_for('auth.login') }}">
+        <span>Войти через Яндекс</span>
+    </a>
+    <a class="secondary-link" href="{{ url_for('main.index') }}">Продолжить без входа</a>
 </div>
 {% endblock %}

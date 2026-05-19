@@ -9,9 +9,15 @@ load_dotenv()
 class Config:
     SECRET_KEY = os.getenv("SECRET_KEY", secrets.token_hex(64))
     HASH_FILE = os.getenv('HASH_FILE', 'magic_link.json')
+    YANDEX_CLIENT_ID = os.getenv("YANDEX_CLIENT_ID", "")
+    YANDEX_CLIENT_SECRET = os.getenv("YANDEX_CLIENT_SECRET", "")
+    YANDEX_REDIRECT_URI = os.getenv("YANDEX_REDIRECT_URI", "")
+    YANDEX_AUTH_URL = os.getenv("YANDEX_AUTH_URL", "https://oauth.yandex.com/authorize")
+    YANDEX_TOKEN_URL = os.getenv("YANDEX_TOKEN_URL", "https://oauth.yandex.com/token")
+    YANDEX_INFO_URL = os.getenv("YANDEX_INFO_URL", "https://login.yandex.ru/info")
 
     SESSION_COOKIE_HTTPONLY = True
-    SESSION_COOKIE_SECURE = True
+    SESSION_COOKIE_SECURE = os.getenv("SESSION_COOKIE_SECURE", "true").lower() in ("1", "true", "yes")
     SESSION_COOKIE_SAMESITE = 'Lax'
     PERMANENT_SESSION_LIFETIME = timedelta(days=30)
     SESSION_PERMANENT = True

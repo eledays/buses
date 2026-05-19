@@ -17,13 +17,20 @@
         <span class="brand-mark"></span>
         <span>Автобусы</span>
       </a>
-      {% if session.get("authorized") %}
-        <nav class="nav">
-          <a class="{{ 'active' if active_page == 'entry' else '' }}" href="{{ url_for('main.index') }}">Запись</a>
-          <a class="{{ 'active' if active_page == 'profile' else '' }}" href="{{ url_for('main.stats') }}">Статистика</a>
-          <a class="{{ 'active' if active_page == 'rides' else '' }}" href="{{ url_for('main.rides') }}">Поездки</a>
-        </nav>
-      {% endif %}
+      <nav class="nav">
+        <a class="{{ 'active' if active_page == 'entry' else '' }}" href="{{ url_for('main.index') }}">Запись</a>
+        <a class="{{ 'active' if active_page == 'profile' else '' }}" href="{{ url_for('main.stats') }}">Статистика</a>
+        <a class="{{ 'active' if active_page == 'rides' else '' }}" href="{{ url_for('main.rides') }}">Поездки</a>
+      </nav>
+      <div class="account-bar">
+        {% if current_user %}
+          <span>{{ current_user.display_name or current_user.login or current_user.email or "Аккаунт" }}</span>
+          <a href="{{ url_for('auth.logout') }}">Выйти</a>
+        {% else %}
+          <span>Гостевой режим</span>
+          <a href="{{ url_for('auth.login') }}">Войти через Яндекс</a>
+        {% endif %}
+      </div>
     </header>
 
     <main>
