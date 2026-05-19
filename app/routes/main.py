@@ -4,7 +4,7 @@ from app.utils.db import (
 )
 from app.utils.formats import (
     normalize_field, normalize_note, parse_ride_datetime, 
-    serialize_ride, wants_json_response
+    serialize_ride, validate_ride_fields, wants_json_response
 )
 from io import BytesIO
 
@@ -30,9 +30,9 @@ def index():
         route_number = normalize_field(request.form.get("route_number"))
         bus_number = normalize_field(request.form.get("bus_number"))
         note = normalize_note(request.form.get("note"))
+        error = validate_ride_fields(route_number, bus_number, note)
 
-        if not route_number or not bus_number:
-            error = "Заполни маршрут и серийный номер автобуса."
+        if error:
             if wants_json_response():
                 return jsonify({"ok": False, "error": error}), 400
         else:
@@ -75,11 +75,15 @@ def avatar():
     if not avatar_data or not avatar_mime:
         abort(404)
 
-    return send_file(
+    response = send_file(
         BytesIO(avatar_data),
         mimetype=avatar_mime,
-        max_age=86400,
+        max_age=0,
     )
+    response.cache_control.no_store = True
+    response.cache_control.private = True
+    response.cache_control.max_age = 0
+    return response
 
 
 @bp.route("/rides/<int:ride_id>", methods=["PUT", "DELETE"])
@@ -101,8 +105,9 @@ def ride_detail(ride_id):
     except ValueError:
         return jsonify({"ok": False, "error": "Укажи корректную дату и время."}), 400
 
-    if not route_number or not bus_number:
-        return jsonify({"ok": False, "error": "Заполни маршрут и серийный номер автобуса."}), 400
+    error = validate_ride_fields(route_number, bus_number, note)
+    if error:
+        return jsonify({"ok": False, "error": error}), 400
 
     update_ride(g.db, g.owner, ride_id, route_number, bus_number, note, ridden_at)
     return jsonify({"ok": True, "ride": serialize_ride(get_ride(g.db, g.owner, ride_id))})

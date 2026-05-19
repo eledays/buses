@@ -20,6 +20,7 @@ OAUTH_TIMEOUT = 5
 AVATAR_TIMEOUT = 5
 MAX_AVATAR_BYTES = 1024 * 1024
 ALLOWED_AVATAR_TYPES = {"image/jpeg", "image/png", "image/webp", "image/gif"}
+YANDEX_AVATAR_BASE_URL = "https://avatars.yandex.net/get-yapic"
 
 
 @bp.route('/login')
@@ -28,10 +29,15 @@ def login():
 
 
 def avatar_url_from_profile(profile):
-    avatar_url = profile.get("default_avatar_id")
-    if avatar_url and not avatar_url.startswith(("http://", "https://")):
-        return f"https://avatars.yandex.net/get-yapic/{avatar_url}/islands-200"
-    return avatar_url
+    avatar_id = profile.get("default_avatar_id")
+    if not avatar_id:
+        return None
+
+    avatar_id = str(avatar_id).strip().strip("/")
+    if not avatar_id or "/" in avatar_id or avatar_id.startswith(("http://", "https://")):
+        return None
+
+    return f"{YANDEX_AVATAR_BASE_URL}/{avatar_id}/islands-200"
 
 
 def fetch_avatar(profile):

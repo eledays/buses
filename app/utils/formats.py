@@ -4,6 +4,9 @@ from zoneinfo import ZoneInfo
 from flask import request
 
 LOCAL_TZ = ZoneInfo("Europe/Moscow")
+MAX_ROUTE_LENGTH = 16
+MAX_BUS_LENGTH = 32
+MAX_NOTE_LENGTH = 240
 
 
 def normalize_field(value):
@@ -27,6 +30,18 @@ def normalize_note(value):
 
     note = " ".join(value.strip().split())
     return note or None
+
+
+def validate_ride_fields(route_number, bus_number, note):
+    if not route_number or not bus_number:
+        return "Заполни маршрут и серийный номер автобуса."
+    if len(route_number) > MAX_ROUTE_LENGTH:
+        return f"Маршрут не должен быть длиннее {MAX_ROUTE_LENGTH} символов."
+    if len(bus_number) > MAX_BUS_LENGTH:
+        return f"Серийный номер не должен быть длиннее {MAX_BUS_LENGTH} символов."
+    if note and len(note) > MAX_NOTE_LENGTH:
+        return f"Заметка не должна быть длиннее {MAX_NOTE_LENGTH} символов."
+    return None
 
 
 def parse_ride_datetime(value):
