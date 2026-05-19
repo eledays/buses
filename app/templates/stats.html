@@ -2,6 +2,11 @@
 {% block title %}Статистика - Автобусы{% endblock %}
 
 {% block content %}
+<div class="profile">
+  <img src="/avatar">
+  <h2>{{ current_user.display_name or current_user.login or current_user.email or "Аккаунт" }}</h2>
+</div>
+
 <section class="metric-strip">
   <div>
     <strong>{{ stats.totals.rides or 0 }}</strong>

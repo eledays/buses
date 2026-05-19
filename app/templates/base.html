@@ -24,13 +24,7 @@
         <a class="{{ 'active' if active_page == 'rides' else '' }}" href="{{ url_for('main.rides') }}">Поездки</a>
       </nav>
       <div class="account-bar">
-        {% if current_user %}
-          <span>{{ current_user.display_name or current_user.login or current_user.email or "Аккаунт" }}</span>
-          <form class="inline-logout-form" method="post" action="{{ url_for('auth.logout') }}">
-            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-            <button type="submit">Выйти</button>
-          </form>
-        {% else %}
+        {% if not current_user %}
           <span>Гостевой режим</span>
           <a href="{{ url_for('auth.login') }}">Войти через Яндекс</a>
         {% endif %}

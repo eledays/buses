@@ -23,7 +23,7 @@ body.page-glow::after {
   justify-content: space-between;
   width: min(720px, calc(100% - 32px));
   margin: 0 auto;
-  padding: 24px 0;
+  padding-top: 24px;
   grid-template-columns: 1fr;
 }
 
@@ -162,7 +162,7 @@ body.page-glow::after {
 .reward {
   border: 1px solid var(--line);
   border-radius: 8px;
-  background: rgba(255, 255, 255, 0.035);
+  /* background: rgba(255, 255, 255, 0.035); */
   box-shadow: var(--shadow);
   backdrop-filter: blur(18px);
   max-width: 100%;
@@ -735,7 +735,7 @@ textarea:focus {
   padding: 18px;
   border: 1px solid var(--line);
   border-radius: 8px;
-  background: rgba(255, 255, 255, 0.035);
+  /* background: rgba(255, 255, 255, 0.035); */
   text-align: center;
 }
 
@@ -1157,4 +1157,22 @@ textarea[name="note"] {
   color: var(--muted);
   font-size: 14px;
   font-weight: 800;
+}
+
+.profile {
+  display: block;
+  margin-bottom: 18px;
+}
+
+.profile img {
+  display: block;
+  width: 100px;
+  border-radius: 50%;
+  margin: auto;
+  margin-bottom: 12px;
+}
+
+.profile h2 {
+  width: 100%;
+  text-align: center;
 }
