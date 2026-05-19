@@ -149,6 +149,7 @@ def legal_document(slug):
         active_page=None,
         title=document["title"],
         blocks=parse_legal_markdown(content),
+        skip_onboarding=True,
     )
 
 

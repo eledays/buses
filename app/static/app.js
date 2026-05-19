@@ -4,9 +4,39 @@ const rideForm = document.querySelector(".ride-form");
 const formError = document.querySelector("[data-form-error]");
 const buttonRecord = document.querySelector(".button-record");
 const recentRidesList = document.querySelector("[data-recent-rides]");
+const onboarding = document.querySelector("[data-onboarding]");
 const csrfToken = document.querySelector('meta[name="csrf-token"]')?.content || "";
 let buttonTimers = [];
 let pageGlowTimer = null;
+
+if (onboarding) {
+  const startButton = onboarding.querySelector("[data-onboarding-start]");
+  const storageKey = "buses_onboarding_done";
+
+  function closeOnboarding() {
+    try {
+      window.localStorage.setItem(storageKey, "1");
+    } catch (_error) {
+      // Browsers can disable storage; closing should still work for the current page.
+    }
+    onboarding.hidden = true;
+    document.body.classList.remove("has-onboarding");
+  }
+
+  let onboardingDone = false;
+  try {
+    onboardingDone = window.localStorage.getItem(storageKey) === "1";
+  } catch (_error) {
+    onboardingDone = false;
+  }
+
+  if (!onboardingDone) {
+    onboarding.hidden = false;
+    document.body.classList.add("has-onboarding");
+  }
+
+  startButton?.addEventListener("click", closeOnboarding);
+}
 
 if (reward) {
   const record = Number(reward.dataset.record || 0);

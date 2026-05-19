@@ -18,6 +18,83 @@ body.page-glow::after {
   animation: pageGlow 650ms ease-out both;
 }
 
+body.has-onboarding {
+  overflow: hidden;
+}
+
+.onboarding {
+  position: fixed;
+  inset: 0;
+  z-index: 100;
+  display: grid;
+  place-items: center;
+  padding: 18px;
+  background: rgba(2, 5, 10, 0.86);
+  backdrop-filter: blur(18px);
+}
+
+.onboarding[hidden] {
+  display: none;
+}
+
+.onboarding-panel {
+  display: grid;
+  gap: 18px;
+  width: min(560px, 100%);
+  max-height: calc(100dvh - 36px);
+  overflow: auto;
+  padding: 20px;
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  border-radius: 8px;
+  background: rgba(8, 12, 18, 0.98);
+  box-shadow:
+    0 24px 90px rgba(0, 0, 0, 0.68),
+    0 0 80px rgba(56, 215, 255, 0.12);
+}
+
+.onboarding-slide {
+  display: grid;
+  gap: 14px;
+  align-content: center;
+}
+
+.onboarding-slide h1 {
+  max-width: none;
+  margin-bottom: 0;
+  font-size: clamp(34px, 8vw, 58px);
+}
+
+.onboarding-slide p {
+  margin: 0;
+  font-size: 1.1rem;
+  line-height: 1.55;
+}
+
+.onboarding-legal {
+  padding: 12px;
+  border: 1px solid rgba(146, 165, 183, 0.16);
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.035);
+  font-size: 13px !important;
+}
+
+.onboarding-legal a {
+  color: var(--cyan);
+  font-weight: 800;
+}
+
+.onboarding-actions {
+  display: grid;
+}
+
+.onboarding-actions .primary-button {
+  min-height: 50px;
+}
+
+.onboarding-start {
+  width: 100%;
+}
+
 .topbar {
   align-items: center;
   justify-content: space-between;
