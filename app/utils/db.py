@@ -26,11 +26,15 @@ def init_db(db):
             email TEXT,
             display_name TEXT,
             avatar_url TEXT,
+            avatar_data BLOB,
+            avatar_mime TEXT,
             created_at TEXT NOT NULL,
             updated_at TEXT NOT NULL
         )
         """
     )
+    ensure_column(db, "users", "avatar_data", "BLOB")
+    ensure_column(db, "users", "avatar_mime", "TEXT")
     db.execute("CREATE INDEX IF NOT EXISTS idx_rides_route ON rides(route_number)")
     db.execute("CREATE INDEX IF NOT EXISTS idx_rides_bus ON rides(bus_number)")
     db.execute("CREATE INDEX IF NOT EXISTS idx_rides_user ON rides(user_id)")
@@ -82,6 +86,19 @@ def get_user(db, user_id):
     if not user_id:
         return None
     return db.execute("SELECT * FROM users WHERE id = ?", (user_id,)).fetchone()
+
+
+def update_user_avatar(db, user_id, avatar_data, avatar_mime):
+    now = datetime.now(UTC).replace(microsecond=0).isoformat()
+    db.execute(
+        """
+        UPDATE users
+        SET avatar_data = ?, avatar_mime = ?, updated_at = ?
+        WHERE id = ?
+        """,
+        (avatar_data, avatar_mime, now, user_id),
+    )
+    db.commit()
 
 
 def claim_guest_rides(db, guest_id, user_id):

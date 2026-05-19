@@ -4,7 +4,7 @@ from urllib.parse import urlencode
 import requests
 
 from config import Config
-from app.utils.db import claim_guest_rides, get_or_create_user
+from app.utils.db import claim_guest_rides, get_or_create_user, update_user_avatar
 from flask import (
     Blueprint,
     g,
@@ -17,6 +17,9 @@ from flask import (
 
 bp = Blueprint("auth", __name__)
 OAUTH_TIMEOUT = 5
+AVATAR_TIMEOUT = 5
+MAX_AVATAR_BYTES = 1024 * 1024
+ALLOWED_AVATAR_TYPES = {"image/jpeg", "image/png", "image/webp", "image/gif"}
 
 
 @bp.route('/login')
@@ -24,9 +27,49 @@ def login():
     return redirect(url_for('auth.oauth_yandex'))
 
 
+def avatar_url_from_profile(profile):
+    avatar_url = profile.get("default_avatar_id")
+    if avatar_url and not avatar_url.startswith(("http://", "https://")):
+        return f"https://avatars.yandex.net/get-yapic/{avatar_url}/islands-200"
+    return avatar_url
+
+
+def fetch_avatar(profile):
+    avatar_url = avatar_url_from_profile(profile)
+    if not avatar_url:
+        return None, None, True
+
+    try:
+        with requests.get(avatar_url, stream=True, timeout=AVATAR_TIMEOUT) as response:
+            if response.status_code != 200:
+                return None, None, False
+
+            content_type = response.headers.get("Content-Type", "").split(";", 1)[0].strip().lower()
+            if content_type not in ALLOWED_AVATAR_TYPES:
+                return None, None, False
+
+            chunks = []
+            total_size = 0
+            for chunk in response.iter_content(chunk_size=8192):
+                if not chunk:
+                    continue
+                total_size += len(chunk)
+                if total_size > MAX_AVATAR_BYTES:
+                    return None, None, False
+                chunks.append(chunk)
+    except requests.RequestException:
+        return None, None, False
+
+    avatar_data = b"".join(chunks)
+    if not avatar_data:
+        return None, None, False
+
+    return avatar_data, content_type, True
+
+
 @bp.route("/oauth/login")
 def oauth_yandex():
-    if g.current_user:
+    if g.current_user and g.current_user["avatar_data"]:
         return redirect(url_for("main.index"))
 
     state = secrets.token_urlsafe(32)
@@ -37,7 +80,7 @@ def oauth_yandex():
         "response_type": "code",
         "client_id": Config.YANDEX_CLIENT_ID,
         "redirect_uri": Config.YANDEX_REDIRECT_URI,
-        "scope": "login:info",
+        "scope": "login:info login:avatar",
         "state": state
     }
     auth_url = Config.YANDEX_AUTH_URL + "?" + urlencode(params)
@@ -103,6 +146,9 @@ def yandex_callback():
         return render_template("login.html", error="Яндекс не вернул идентификатор профиля."), 502
 
     user = get_or_create_user(g.db, user_data)
+    avatar_data, avatar_mime, avatar_loaded = fetch_avatar(user_data)
+    if avatar_loaded:
+        update_user_avatar(g.db, user["id"], avatar_data, avatar_mime)
 
     claimed = claim_guest_rides(g.db, session.get("guest_id"), user["id"])
     session.pop("oauth_state", None)

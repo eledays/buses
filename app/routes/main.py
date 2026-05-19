@@ -6,12 +6,16 @@ from app.utils.formats import (
     normalize_field, normalize_note, parse_ride_datetime, 
     serialize_ride, wants_json_response
 )
+from io import BytesIO
+
 from flask import (
+    abort,
     Blueprint,
     g,
     jsonify,
     render_template,
     request,
+    send_file,
 )
 
 bp = Blueprint('main', __name__)
@@ -59,6 +63,23 @@ def stats():
 def rides():
     all_rides = get_all_rides(g.db, g.owner)
     return render_template("rides.html", active_page="rides", rides=all_rides)
+
+
+@bp.route("/avatar")
+def avatar():
+    if not g.current_user:
+        abort(401)
+
+    avatar_data = g.current_user["avatar_data"]
+    avatar_mime = g.current_user["avatar_mime"]
+    if not avatar_data or not avatar_mime:
+        abort(404)
+
+    return send_file(
+        BytesIO(avatar_data),
+        mimetype=avatar_mime,
+        max_age=86400,
+    )
 
 
 @bp.route("/rides/<int:ride_id>", methods=["PUT", "DELETE"])
