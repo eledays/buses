@@ -211,7 +211,7 @@ def add_ride(db, owner, route_number, bus_number, note) -> int:
     now = datetime.now(UTC).replace(microsecond=0)
     user_id = owner.get("user_id")
     guest_id = None if user_id else owner["guest_id"]
-    cursor = db.execute(
+    db.execute(
         """
         INSERT INTO rides (route_number, bus_number, note, user_id, guest_id, ridden_at)
         VALUES (?, ?, ?, ?, ?, ?)
@@ -219,16 +219,35 @@ def add_ride(db, owner, route_number, bus_number, note) -> int:
         (route_number, bus_number, note, user_id, guest_id, now.isoformat()),
     )
     db.commit()
-    return cursor.lastrowid
+
+    clause, params = owner_filter(owner)
+    result = db.execute(
+        f"""
+        SELECT COUNT(*) AS total
+        FROM rides
+        WHERE {clause}
+        """,
+        params,
+    ).fetchone()
+    return result["total"]
 
 
 def get_all_rides(db, owner) -> list:
     clause, params = owner_filter(owner)
     cursor = db.execute(
         f"""
-        SELECT id, route_number, bus_number, note, ridden_at
-        FROM rides
-        WHERE {clause}
+        SELECT id, route_number, bus_number, note, ridden_at, record_number
+        FROM (
+            SELECT
+                id,
+                route_number,
+                bus_number,
+                note,
+                ridden_at,
+                ROW_NUMBER() OVER (ORDER BY id ASC) AS record_number
+            FROM rides
+            WHERE {clause}
+        )
         ORDER BY ridden_at DESC, id DESC
         """,
         params,

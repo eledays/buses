@@ -29,8 +29,8 @@
             <p class="ride-note" data-ride-note hidden></p>
           {% endif %}
         </div>
-        <span class="ride-id">#{{ ride.id }}</span>
-        <button class="edit-ride-button" type="button" aria-label="Редактировать запись #{{ ride.id }}" data-edit-ride>✎</button>
+        <span class="ride-id">#{{ ride.record_number }}</span>
+        <button class="edit-ride-button" type="button" aria-label="Редактировать поездку #{{ ride.record_number }}" data-edit-ride>✎</button>
       </article>
     {% else %}
       <p class="empty-state">Записей пока нет.</p>

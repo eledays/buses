@@ -20,8 +20,8 @@
       </a>
       <nav class="nav">
         <a class="{{ 'active' if active_page == 'entry' else '' }}" href="{{ url_for('main.index') }}">Запись</a>
-        <a class="{{ 'active' if active_page == 'profile' else '' }}" href="{{ url_for('main.stats') }}">Статистика</a>
         <a class="{{ 'active' if active_page == 'rides' else '' }}" href="{{ url_for('main.rides') }}">Поездки</a>
+        <a class="{{ 'active' if active_page == 'profile' else '' }}" href="{{ url_for('main.stats') }}">Профиль</a>
       </nav>
       <div class="account-bar">
         {% if not current_user %}
