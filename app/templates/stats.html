@@ -88,7 +88,10 @@
 </section>
 
 {% if current_user %}
-  <a class="logout-button" href="{{ url_for('auth.logout') }}">Выход</a>
+  <form method="post" action="{{ url_for('auth.logout') }}">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+    <button class="logout-button" type="submit">Выход</button>
+  </form>
 {% else %}
   <a class="login-cta" href="{{ url_for('auth.login') }}">Войти через Яндекс и сохранить поездки</a>
 {% endif %}

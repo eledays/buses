@@ -7,13 +7,17 @@ load_dotenv()
 
 
 class Config:
-    SECRET_KEY = os.getenv("SECRET_KEY", secrets.token_hex(64))
+    APP_ENV = os.getenv("APP_ENV", os.getenv("FLASK_ENV", "development")).lower()
+    SECRET_KEY = os.getenv("SECRET_KEY")
+    if not SECRET_KEY and APP_ENV in ("production", "prod"):
+        raise RuntimeError("SECRET_KEY must be set in production")
+    SECRET_KEY = SECRET_KEY or secrets.token_hex(64)
     HASH_FILE = os.getenv('HASH_FILE', 'magic_link.json')
     YANDEX_CLIENT_ID = os.getenv("YANDEX_CLIENT_ID", "")
     YANDEX_CLIENT_SECRET = os.getenv("YANDEX_CLIENT_SECRET", "")
     YANDEX_REDIRECT_URI = os.getenv("YANDEX_REDIRECT_URI", "")
-    YANDEX_AUTH_URL = os.getenv("YANDEX_AUTH_URL", "https://oauth.yandex.com/authorize")
-    YANDEX_TOKEN_URL = os.getenv("YANDEX_TOKEN_URL", "https://oauth.yandex.com/token")
+    YANDEX_AUTH_URL = os.getenv("YANDEX_AUTH_URL", "https://oauth.yandex.ru/authorize")
+    YANDEX_TOKEN_URL = os.getenv("YANDEX_TOKEN_URL", "https://oauth.yandex.ru/token")
     YANDEX_INFO_URL = os.getenv("YANDEX_INFO_URL", "https://login.yandex.ru/info")
 
     SESSION_COOKIE_HTTPONLY = True

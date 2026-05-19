@@ -2,11 +2,12 @@ from app.utils.formats import (
     format_datetime_input, format_datetime_local, format_profile_day, plural_word, pluralize
 )
 from app.utils.db import get_user, init_db
+from app.utils.csrf import get_csrf_token, validate_csrf_token
 
 import sqlite3
 import secrets
 
-from flask import Flask, g, session
+from flask import Flask, abort, g, request, session
 
 from config import Config
 
@@ -34,6 +35,11 @@ def create_app():
             "guest_id": session["guest_id"],
         }
 
+        get_csrf_token()
+
+        if request.method in ("POST", "PUT", "PATCH", "DELETE") and not validate_csrf_token():
+            abort(400)
+
     @app.teardown_request
     def close_database(_error=None):
         db = g.pop("db", None)
@@ -45,6 +51,7 @@ def create_app():
         return {
             "current_user": getattr(g, "current_user", None),
             "is_guest": getattr(g, "current_user", None) is None,
+            "csrf_token": get_csrf_token,
         }
     
     app.jinja_env.filters["profile_day"] = format_profile_day

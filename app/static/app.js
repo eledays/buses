@@ -3,6 +3,7 @@ const primaryButton = document.querySelector(".primary-button");
 const rideForm = document.querySelector(".ride-form");
 const formError = document.querySelector("[data-form-error]");
 const buttonRecord = document.querySelector(".button-record");
+const csrfToken = document.querySelector('meta[name="csrf-token"]')?.content || "";
 let buttonTimers = [];
 let pageGlowTimer = null;
 
@@ -89,6 +90,7 @@ if (rideForm && primaryButton) {
         body: new FormData(rideForm),
         headers: {
           "Accept": "application/json",
+          "X-CSRF-Token": csrfToken,
           "X-Requested-With": "fetch",
         },
       });
@@ -263,6 +265,7 @@ rideEditForm?.addEventListener("submit", async (event) => {
       body: new FormData(rideEditForm),
       headers: {
         "Accept": "application/json",
+        "X-CSRF-Token": csrfToken,
         "X-Requested-With": "fetch",
       },
     });
@@ -296,6 +299,7 @@ document.querySelector("[data-delete-ride]")?.addEventListener("click", async ()
       method: "DELETE",
       headers: {
         "Accept": "application/json",
+        "X-CSRF-Token": csrfToken,
         "X-Requested-With": "fetch",
       },
     });

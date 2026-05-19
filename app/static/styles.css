@@ -93,8 +93,13 @@ body.page-glow::after {
   font-weight: 700;
 }
 
-.account-bar a {
+.account-bar a,
+.account-bar button {
+  border: 0;
+  background: transparent;
   color: var(--cyan);
+  cursor: pointer;
+  font: inherit;
   font-weight: 900;
 }
 
@@ -883,7 +888,9 @@ textarea:focus {
   border-radius: 8px;
   background: rgba(255, 85, 116, 0.08);
   color: #ffd7df;
+  cursor: pointer;
   font-weight: 900;
+  width: 100%;
   box-shadow: 0 0 28px rgba(255, 85, 116, 0.08);
   transition:
     border-color 160ms ease,
