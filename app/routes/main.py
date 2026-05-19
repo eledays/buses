@@ -7,6 +7,7 @@ from app.utils.formats import (
     serialize_ride, validate_ride_fields, wants_json_response
 )
 from io import BytesIO
+from pathlib import Path
 
 from flask import (
     abort,
@@ -17,9 +18,68 @@ from flask import (
     request,
     send_file,
 )
+from config import Config
 
 bp = Blueprint('main', __name__)
 GUEST_RIDES_LIMIT = 20
+LEGAL_DOCS = {
+    "user-agreement": {
+        "filename": "user_agreement.md",
+        "title": "Пользовательское соглашение",
+    },
+    "privacy-policy": {
+        "filename": "privacy_policy.md",
+        "title": "Политика обработки персональных данных",
+    },
+    "personal-data-consent": {
+        "filename": "personal_data_consent.md",
+        "title": "Согласие на обработку персональных данных",
+    },
+}
+
+
+def parse_legal_markdown(content):
+    blocks = []
+    paragraph = []
+    list_items = []
+
+    def flush_paragraph():
+        nonlocal paragraph
+        if paragraph:
+            blocks.append({"type": "paragraph", "text": " ".join(paragraph)})
+            paragraph = []
+
+    def flush_list():
+        nonlocal list_items
+        if list_items:
+            blocks.append({"type": "list", "items_list": list_items})
+            list_items = []
+
+    for raw_line in content.splitlines():
+        line = raw_line.strip()
+        if not line:
+            flush_paragraph()
+            flush_list()
+            continue
+
+        if line.startswith("# "):
+            flush_paragraph()
+            flush_list()
+            blocks.append({"type": "h1", "text": line[2:].strip()})
+        elif line.startswith("## "):
+            flush_paragraph()
+            flush_list()
+            blocks.append({"type": "h2", "text": line[3:].strip()})
+        elif line.startswith("- "):
+            flush_paragraph()
+            list_items.append(line[2:].strip())
+        else:
+            flush_list()
+            paragraph.append(line)
+
+    flush_paragraph()
+    flush_list()
+    return blocks
 
 
 @bp.route("/", methods=["GET", "POST"])
@@ -70,6 +130,26 @@ def stats():
 def rides():
     all_rides = get_all_rides(g.db, g.owner)
     return render_template("rides.html", active_page="rides", rides=all_rides)
+
+
+@bp.route("/legal/<slug>")
+def legal_document(slug):
+    document = LEGAL_DOCS.get(slug)
+    if document is None:
+        abort(404)
+
+    path = Path(Config.BASE_DIR) / "docs" / "legal" / document["filename"]
+    try:
+        content = path.read_text(encoding="utf-8")
+    except OSError:
+        abort(404)
+
+    return render_template(
+        "legal.html",
+        active_page=None,
+        title=document["title"],
+        blocks=parse_legal_markdown(content),
+    )
 
 
 @bp.route("/avatar")

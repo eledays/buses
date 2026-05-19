@@ -35,6 +35,12 @@
       {% block content %}{% endblock %}
     </main>
 
+    <footer class="site-footer">
+      <a href="{{ url_for('main.legal_document', slug='user-agreement') }}">Пользовательское соглашение</a>
+      <a href="{{ url_for('main.legal_document', slug='privacy-policy') }}">Политика обработки персональных данных</a>
+      <a href="{{ url_for('main.legal_document', slug='personal-data-consent') }}">Согласие на обработку персональных данных</a>
+    </footer>
+
     <script src="{{ url_for('static', filename='app.js') }}"></script>
   </body>
 </html>

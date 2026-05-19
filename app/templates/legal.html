@@ -1,0 +1,22 @@
+{% extends "base.html" %}
+{% block title %}{{ title }} - Автобусы{% endblock %}
+
+{% block content %}
+<article class="legal-page">
+  {% for block in blocks %}
+    {% if block.type == "h1" %}
+      <h1>{{ block.text }}</h1>
+    {% elif block.type == "h2" %}
+      <h2>{{ block.text }}</h2>
+    {% elif block.type == "list" %}
+      <ul>
+        {% for item in block.items_list %}
+          <li>{{ item }}</li>
+        {% endfor %}
+      </ul>
+    {% else %}
+      <p>{{ block.text }}</p>
+    {% endif %}
+  {% endfor %}
+</article>
+{% endblock %}

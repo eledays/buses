@@ -23,9 +23,49 @@ ALLOWED_AVATAR_TYPES = {"image/jpeg", "image/png", "image/webp", "image/gif"}
 YANDEX_AVATAR_BASE_URL = "https://avatars.yandex.net/get-yapic"
 
 
-@bp.route('/login')
+@bp.route('/login', methods=["GET", "POST"])
 def login():
-    return redirect(url_for('auth.oauth_yandex'))
+    if g.current_user:
+        return redirect(url_for("main.index"))
+
+    if request.method == "POST":
+        if request.form.get("personal_data_consent") != "on":
+            return render_template(
+                "login.html",
+                error="Подтверди согласие на обработку персональных данных.",
+            ), 400
+
+        session["personal_data_consent"] = True
+        session.permanent = True
+        return redirect(url_for('auth.oauth_yandex'))
+
+    return render_template("login.html")
+
+
+@bp.route("/oauth/login")
+def oauth_yandex():
+    if not session.get("personal_data_consent"):
+        return render_template(
+            "login.html",
+            error="Перед входом через Яндекс нужно подтвердить согласие на обработку персональных данных.",
+        ), 400
+
+    if g.current_user and g.current_user["avatar_data"]:
+        return redirect(url_for("main.index"))
+
+    state = secrets.token_urlsafe(32)
+    session["oauth_state"] = state
+    session.permanent = True
+
+    params = {
+        "response_type": "code",
+        "client_id": Config.YANDEX_CLIENT_ID,
+        "redirect_uri": Config.YANDEX_REDIRECT_URI,
+        "scope": "login:info login:avatar",
+        "state": state
+    }
+    auth_url = Config.YANDEX_AUTH_URL + "?" + urlencode(params)
+    return redirect(auth_url)
 
 
 def avatar_url_from_profile(profile):
@@ -71,26 +111,6 @@ def fetch_avatar(profile):
         return None, None, False
 
     return avatar_data, content_type, True
-
-
-@bp.route("/oauth/login")
-def oauth_yandex():
-    if g.current_user and g.current_user["avatar_data"]:
-        return redirect(url_for("main.index"))
-
-    state = secrets.token_urlsafe(32)
-    session["oauth_state"] = state
-    session.permanent = True
-
-    params = {
-        "response_type": "code",
-        "client_id": Config.YANDEX_CLIENT_ID,
-        "redirect_uri": Config.YANDEX_REDIRECT_URI,
-        "scope": "login:info login:avatar",
-        "state": state
-    }
-    auth_url = Config.YANDEX_AUTH_URL + "?" + urlencode(params)
-    return redirect(auth_url)
 
 
 @bp.route("/auth/yandex/callback")

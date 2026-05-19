@@ -1215,6 +1215,104 @@ textarea[name="note"] {
   font-weight: 800;
 }
 
+.login-consent-form {
+  display: grid;
+  gap: 12px;
+}
+
+.consent-check {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  padding: 12px;
+  border: 1px solid rgba(146, 165, 183, 0.18);
+  border-radius: 8px;
+  background: rgba(2, 5, 10, 0.42);
+}
+
+.consent-check input {
+  width: 18px;
+  min-width: 18px;
+  height: 18px;
+  min-height: 18px;
+  margin-top: 2px;
+  accent-color: var(--cyan);
+}
+
+.consent-check span,
+.legal-hint {
+  color: rgba(238, 247, 255, 0.78);
+  font-size: 13px;
+  line-height: 1.45;
+}
+
+.consent-check a,
+.legal-hint a {
+  color: var(--cyan);
+  font-weight: 800;
+}
+
+.legal-hint {
+  margin: 0;
+}
+
+.site-footer {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 10px 18px;
+  max-width: 960px;
+  margin: 28px auto 0;
+  padding: 0 18px 22px;
+}
+
+.site-footer a {
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.site-footer a:hover {
+  color: var(--cyan);
+}
+
+.legal-page {
+  max-width: 860px;
+  margin: 0 auto;
+  padding: 18px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.035);
+  box-shadow: var(--shadow);
+}
+
+.legal-page h1 {
+  max-width: none;
+  margin-bottom: 18px;
+  font-size: clamp(32px, 5vw, 52px);
+  line-height: 1;
+}
+
+.legal-page h2 {
+  margin-top: 26px;
+  margin-bottom: 10px;
+  color: var(--cyan);
+  font-size: 22px;
+}
+
+.legal-page p,
+.legal-page li {
+  color: rgba(238, 247, 255, 0.82);
+  line-height: 1.6;
+}
+
+.legal-page ul {
+  display: grid;
+  gap: 6px;
+  margin: 0 0 16px;
+  padding-left: 22px;
+}
+
 .profile {
   display: block;
   margin-bottom: 18px;
