@@ -8,6 +8,7 @@ import sqlite3
 import secrets
 
 from flask import Flask, abort, g, request, session
+from werkzeug.middleware.proxy_fix import ProxyFix
 
 from config import Config
 
@@ -15,6 +16,14 @@ from config import Config
 def create_app():
     app = Flask(__name__)
     app.config.from_object(Config)
+    if app.config["TRUST_PROXY_HEADERS"]:
+        trusted_proxy_count = app.config["TRUSTED_PROXY_COUNT"]
+        app.wsgi_app = ProxyFix(
+            app.wsgi_app,
+            x_for=trusted_proxy_count,
+            x_proto=trusted_proxy_count,
+            x_host=trusted_proxy_count,
+        )
 
     @app.before_request
     def open_database():
