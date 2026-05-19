@@ -1,6 +1,6 @@
 from app.utils.db import (
     get_ride, collect_stats, add_ride, get_all_rides,
-    get_recent_rides, delete_ride, update_ride
+    get_recent_rides, delete_ride, update_ride, count_guest_ip_rides
 )
 from app.utils.formats import (
     normalize_field, normalize_note, parse_ride_datetime, 
@@ -19,6 +19,7 @@ from flask import (
 )
 
 bp = Blueprint('main', __name__)
+GUEST_RIDES_LIMIT = 20
 
 
 @bp.route("/", methods=["GET", "POST"])
@@ -31,6 +32,12 @@ def index():
         bus_number = normalize_field(request.form.get("bus_number"))
         note = normalize_note(request.form.get("note"))
         error = validate_ride_fields(route_number, bus_number, note)
+        if (
+            not error
+            and not g.current_user
+            and count_guest_ip_rides(g.db, g.owner.get("guest_ip")) >= GUEST_RIDES_LIMIT
+        ):
+            error = "Гостевой лимит - 20 поездок. Войди в аккаунт, чтобы сохранять дальше."
 
         if error:
             if wants_json_response():

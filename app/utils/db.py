@@ -11,12 +11,14 @@ def init_db(db):
             note TEXT,
             user_id INTEGER,
             guest_id TEXT,
+            guest_ip TEXT,
             ridden_at TEXT NOT NULL
         )
         """
     )
     ensure_column(db, "rides", "user_id", "INTEGER")
     ensure_column(db, "rides", "guest_id", "TEXT")
+    ensure_column(db, "rides", "guest_ip", "TEXT")
     db.execute(
         """
         CREATE TABLE IF NOT EXISTS users (
@@ -39,6 +41,7 @@ def init_db(db):
     db.execute("CREATE INDEX IF NOT EXISTS idx_rides_bus ON rides(bus_number)")
     db.execute("CREATE INDEX IF NOT EXISTS idx_rides_user ON rides(user_id)")
     db.execute("CREATE INDEX IF NOT EXISTS idx_rides_guest ON rides(guest_id)")
+    db.execute("CREATE INDEX IF NOT EXISTS idx_rides_guest_ip ON rides(guest_ip)")
     db.commit()
 
 
@@ -211,12 +214,13 @@ def add_ride(db, owner, route_number, bus_number, note) -> int:
     now = datetime.now(UTC).replace(microsecond=0)
     user_id = owner.get("user_id")
     guest_id = None if user_id else owner["guest_id"]
+    guest_ip = None if user_id else owner.get("guest_ip")
     db.execute(
         """
-        INSERT INTO rides (route_number, bus_number, note, user_id, guest_id, ridden_at)
-        VALUES (?, ?, ?, ?, ?, ?)
+        INSERT INTO rides (route_number, bus_number, note, user_id, guest_id, guest_ip, ridden_at)
+        VALUES (?, ?, ?, ?, ?, ?, ?)
         """,
-        (route_number, bus_number, note, user_id, guest_id, now.isoformat()),
+        (route_number, bus_number, note, user_id, guest_id, guest_ip, now.isoformat()),
     )
     db.commit()
 
@@ -228,6 +232,20 @@ def add_ride(db, owner, route_number, bus_number, note) -> int:
         WHERE {clause}
         """,
         params,
+    ).fetchone()
+    return result["total"]
+
+
+def count_guest_ip_rides(db, guest_ip) -> int:
+    if not guest_ip:
+        return 0
+    result = db.execute(
+        """
+        SELECT COUNT(*) AS total
+        FROM rides
+        WHERE guest_ip = ? AND user_id IS NULL
+        """,
+        (guest_ip,),
     ).fetchone()
     return result["total"]
 

@@ -33,6 +33,7 @@ def create_app():
         g.owner = {
             "user_id": g.current_user["id"] if g.current_user else None,
             "guest_id": session["guest_id"],
+            "guest_ip": request.remote_addr or "",
         }
 
         get_csrf_token()
