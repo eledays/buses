@@ -2,6 +2,7 @@ from dotenv import load_dotenv
 import os
 import secrets
 from datetime import timedelta
+from pathlib import Path
 
 load_dotenv()
 
@@ -13,6 +14,7 @@ class Config:
         raise RuntimeError("SECRET_KEY must be set in production")
     SECRET_KEY = SECRET_KEY or secrets.token_hex(64)
     HASH_FILE = os.getenv('HASH_FILE', 'magic_link.json')
+    
     YANDEX_CLIENT_ID = os.getenv("YANDEX_CLIENT_ID", "")
     YANDEX_CLIENT_SECRET = os.getenv("YANDEX_CLIENT_SECRET", "")
     YANDEX_REDIRECT_URI = os.getenv("YANDEX_REDIRECT_URI", "")
@@ -29,4 +31,5 @@ class Config:
     SESSION_PERMANENT = True
 
     BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+    STATIC_DIR = Path(BASE_DIR) / 'app' / 'static'
     DATABASE = os.path.join(BASE_DIR, "buses.sqlite3")

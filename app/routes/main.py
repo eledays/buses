@@ -8,6 +8,7 @@ from app.utils.formats import (
 )
 from io import BytesIO
 from pathlib import Path
+import os
 
 from flask import (
     abort,
@@ -156,12 +157,12 @@ def legal_document(slug):
 @bp.route("/avatar")
 def avatar():
     if not g.current_user:
-        abort(401)
+        return send_file(Path(Config.STATIC_DIR) / 'default_avatar.png')
 
     avatar_data = g.current_user["avatar_data"]
     avatar_mime = g.current_user["avatar_mime"]
     if not avatar_data or not avatar_mime:
-        abort(404)
+        return send_file(Path(Config.STATIC_DIR) / 'default_avatar.png')
 
     response = send_file(
         BytesIO(avatar_data),
