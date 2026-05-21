@@ -9,6 +9,7 @@ from app.utils.formats import (
 from io import BytesIO
 from pathlib import Path
 import os
+import re
 
 from flask import (
     abort,
@@ -37,6 +38,38 @@ LEGAL_DOCS = {
         "title": "Согласие на обработку персональных данных",
     },
 }
+LEGAL_LINK_RE = re.compile(r"(https?://[^\s]+|[\w.+-]+@[\w-]+(?:\.[\w-]+)+)")
+LEGAL_TRAILING_PUNCTUATION = ".,;:!?)]»"
+
+
+def linkify_legal_text(text):
+    parts = []
+    position = 0
+
+    for match in LEGAL_LINK_RE.finditer(text):
+        start = match.start()
+        value = match.group(0)
+        trailing = ""
+
+        while value and value[-1] in LEGAL_TRAILING_PUNCTUATION:
+            trailing = value[-1] + trailing
+            value = value[:-1]
+
+        if start > position:
+            parts.append({"type": "text", "text": text[position:start]})
+
+        href = value if value.startswith(("http://", "https://")) else f"mailto:{value}"
+        parts.append({"type": "link", "text": value, "href": href})
+
+        if trailing:
+            parts.append({"type": "text", "text": trailing})
+
+        position = match.end()
+
+    if position < len(text):
+        parts.append({"type": "text", "text": text[position:]})
+
+    return parts or [{"type": "text", "text": text}]
 
 
 def parse_legal_markdown(content):
@@ -47,13 +80,20 @@ def parse_legal_markdown(content):
     def flush_paragraph():
         nonlocal paragraph
         if paragraph:
-            blocks.append({"type": "paragraph", "text": " ".join(paragraph)})
+            text = " ".join(paragraph)
+            blocks.append({"type": "paragraph", "text": text, "parts": linkify_legal_text(text)})
             paragraph = []
 
     def flush_list():
         nonlocal list_items
         if list_items:
-            blocks.append({"type": "list", "items_list": list_items})
+            blocks.append({
+                "type": "list",
+                "items_list": [
+                    {"text": item, "parts": linkify_legal_text(item)}
+                    for item in list_items
+                ],
+            })
             list_items = []
 
     for raw_line in content.splitlines():

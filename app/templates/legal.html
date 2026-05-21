@@ -1,7 +1,17 @@
-{% extends "base.html" %}
+{% extends "legal_base.html" %}
 {% block title %}{{ title }} - Автобусы{% endblock %}
 
 {% block content %}
+{% macro inline_parts(parts) -%}
+  {%- for part in parts -%}
+    {%- if part.type == "link" -%}
+      <a href="{{ part.href }}" target="_blank" rel="noopener">{{ part.text }}</a>
+    {%- else -%}
+      {{ part.text }}
+    {%- endif -%}
+  {%- endfor -%}
+{%- endmacro %}
+
 <article class="legal-page">
   {% for block in blocks %}
     {% if block.type == "h1" %}
@@ -11,11 +21,11 @@
     {% elif block.type == "list" %}
       <ul>
         {% for item in block.items_list %}
-          <li>{{ item }}</li>
+          <li>{{ inline_parts(item.parts) }}</li>
         {% endfor %}
       </ul>
     {% else %}
-      <p>{{ block.text }}</p>
+      <p>{{ inline_parts(block.parts) }}</p>
     {% endif %}
   {% endfor %}
 </article>

@@ -1353,13 +1353,26 @@ textarea[name="note"] {
   color: var(--cyan);
 }
 
+.legal-topbar {
+  justify-content: center;
+}
+
+.legal-topbar .brand {
+  width: auto;
+}
+
+.legal-main {
+  margin-top: 24px;
+  padding-bottom: 32px;
+}
+
 .legal-page {
   max-width: 860px;
   margin: 0 auto;
-  padding: 18px;
-  border: 1px solid var(--line);
+  /* padding: 18px; */
+  /* border: 1px solid var(--line); */
   border-radius: 8px;
-  background: rgba(255, 255, 255, 0.035);
+  /* background: rgba(255, 255, 255, 0.035); */
   box-shadow: var(--shadow);
 }
 
@@ -1381,6 +1394,17 @@ textarea[name="note"] {
 .legal-page li {
   color: rgba(238, 247, 255, 0.82);
   line-height: 1.6;
+}
+
+.legal-page a {
+  color: var(--cyan);
+  font-weight: 800;
+  overflow-wrap: anywhere;
+}
+
+.legal-page a:hover {
+  text-decoration: underline;
+  text-underline-offset: 3px;
 }
 
 .legal-page ul {
