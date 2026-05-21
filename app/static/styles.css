@@ -1,4 +1,4 @@
-@import url('/static/root.css');
+@import url("/static/root.css");
 
 main {
   width: min(720px, calc(100% - 32px));
@@ -13,8 +13,16 @@ body.page-glow::after {
   pointer-events: none;
   content: "";
   background:
-    radial-gradient(circle at 50% 20%, rgba(56, 215, 255, 0.16), transparent 34rem),
-    radial-gradient(circle at 50% 78%, rgba(56, 215, 255, 0.12), transparent 28rem);
+    radial-gradient(
+      circle at 50% 20%,
+      rgba(56, 215, 255, 0.16),
+      transparent 34rem
+    ),
+    radial-gradient(
+      circle at 50% 78%,
+      rgba(56, 215, 255, 0.12),
+      transparent 28rem
+    );
   animation: pageGlow 650ms ease-out both;
 }
 
@@ -29,8 +37,8 @@ body.has-onboarding {
   display: grid;
   place-items: center;
   padding: 18px;
-  background: rgba(2, 5, 10, 0.86);
-  backdrop-filter: blur(18px);
+  background: rgba(2, 5, 10, 0.5);
+  backdrop-filter: blur(2px);
 }
 
 .onboarding[hidden] {
@@ -68,6 +76,7 @@ body.has-onboarding {
   margin: 0;
   font-size: 1.1rem;
   line-height: 1.55;
+  /* margin-bottom: 12px; */
 }
 
 .onboarding-legal {
@@ -764,7 +773,9 @@ textarea:focus {
   background: rgba(56, 215, 255, 0.08);
   color: var(--cyan);
   cursor: pointer;
-  font: 800 18px/1 Inter, sans-serif;
+  font:
+    800 18px/1 Inter,
+    sans-serif;
   transition:
     border-color 160ms ease,
     background-color 160ms ease,
@@ -1152,7 +1163,9 @@ textarea:focus {
   background: rgba(255, 85, 116, 0.09);
   color: #ffd7df;
   cursor: pointer;
-  font: 900 14px/1 Inter, sans-serif;
+  font:
+    900 14px/1 Inter,
+    sans-serif;
   transition:
     border-color 160ms ease,
     background-color 160ms ease;
@@ -1170,7 +1183,7 @@ textarea:focus {
 }
 
 .timeline-day {
-  flex: 1 1 calc(100% / 7 - 10px); 
+  flex: 1 1 calc(100% / 7 - 10px);
   margin: 5px;
   text-align: center;
   padding: 10px;
@@ -1430,4 +1443,27 @@ textarea[name="note"] {
 .profile h2 {
   width: 100%;
   text-align: center;
+}
+
+.onboarding-row {
+  display: flex;
+  gap: 4px;
+}
+
+.onboarding-chip {
+  border-radius: 8px;
+  font-weight: 800;
+  font-size: 1.1rem;
+  color: #000;
+  padding: 6px;
+  width: max-content;
+  display: flex;
+}
+
+.onboarding-route-chip {
+  background-color: var(--cyan);
+}
+
+.onboarding-bus-chip {
+  background-color: #c5c5c5;
 }

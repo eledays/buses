@@ -17,7 +17,13 @@
     <section class="onboarding" data-onboarding hidden aria-labelledby="onboarding-title" aria-modal="true" role="dialog">
       <div class="onboarding-panel">
         <div class="onboarding-slide">
-          <p>Скоро тут появится инструкция</p>
+          <h2>Автобусы — сервис для коллекционирования автобусов</h2>
+          <p>Записывай связи
+          <span class="onboarding-row">
+            <span class="onboarding-route-chip onboarding-chip">маршрут</span><span class="onboarding-bus-chip onboarding-chip">номер автобуса</span> 
+          </span>
+          при каждой поездке, чтобы пополнять свою коллекцию</p>
+          <p>Сервис не несет практического смысла — просто развлечение</p>
           <p class="onboarding-legal">
             Нажимая «Начать работу», ты принимаешь
             <a href="{{ url_for('main.legal_document', slug='user-agreement') }}" target="_blank" rel="noopener">Пользовательское соглашение</a>
