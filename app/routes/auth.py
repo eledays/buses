@@ -74,8 +74,11 @@ def avatar_url_from_profile(profile):
         return None
 
     avatar_id = str(avatar_id).strip().strip("/")
-    if not avatar_id or "/" in avatar_id or avatar_id.startswith(("http://", "https://")):
+    if not avatar_id:
         return None
+
+    if avatar_id.startswith(("http://", "https://")):
+        return avatar_id
 
     return f"{YANDEX_AVATAR_BASE_URL}/{avatar_id}/islands-200"
 
@@ -173,7 +176,7 @@ def yandex_callback():
 
     user = get_or_create_user(g.db, user_data)
     avatar_data, avatar_mime, avatar_loaded = fetch_avatar(user_data)
-    if avatar_loaded:
+    if avatar_loaded and avatar_data and avatar_mime:
         update_user_avatar(g.db, user["id"], avatar_data, avatar_mime)
 
     claimed = claim_guest_rides(g.db, session.get("guest_id"), user["id"])

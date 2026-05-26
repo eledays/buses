@@ -18,6 +18,7 @@ from flask import (
     jsonify,
     render_template,
     request,
+    redirect,
     send_file,
 )
 from config import Config
@@ -202,6 +203,9 @@ def avatar():
     avatar_data = g.current_user["avatar_data"]
     avatar_mime = g.current_user["avatar_mime"]
     if not avatar_data or not avatar_mime:
+        avatar_url = g.current_user["avatar_url"]
+        if avatar_url:
+            return redirect(avatar_url)
         return send_file(Path(Config.STATIC_DIR) / 'default_avatar.png')
 
     response = send_file(

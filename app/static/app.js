@@ -1,6 +1,6 @@
 const reward = document.querySelector(".reward");
-const primaryButton = document.querySelector(".primary-button");
 const rideForm = document.querySelector(".ride-form");
+const primaryButton = rideForm?.querySelector(".primary-button");
 const formError = document.querySelector("[data-form-error]");
 const buttonRecord = document.querySelector(".button-record");
 const recentRidesList = document.querySelector("[data-recent-rides]");
